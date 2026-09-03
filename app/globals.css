@@ -1,0 +1,135 @@
+@import "tailwindcss";
+
+@theme {
+  /* ---- Surfaces : encre profonde, chaude ---- */
+  --color-ink-950: #06070a;
+  --color-ink-900: #0a0c11;
+  --color-ink-850: #0e1118;
+  --color-ink-800: #131720;
+  --color-ink-700: #1b2130;
+  --color-ink-600: #2a3243;
+  --color-ink-500: #3d475c;
+
+  /* ---- Texte ---- */
+  --color-chalk: #f5f7fa;
+  --color-chalk-dim: #a7b0c0;
+  --color-chalk-mute: #838fa2;
+
+  /* ---- Accent : braise ---- */
+  --color-ember-300: #ffc48a;
+  --color-ember-400: #ff9d4d;
+  --color-ember-500: #ff6b2c;
+  --color-ember-600: #ea4f18;
+
+  /* ---- Secondaires ---- */
+  --color-volt-400: #7df1c2;
+  --color-volt-500: #34d399;
+  --color-cyan-glow: #4cc9f0;
+  --color-violet-glow: #9b7bff;
+  --color-danger: #ff5d5d;
+
+  --font-display: var(--font-display), "Archivo", system-ui, sans-serif;
+  --font-sans: var(--font-sans-var), system-ui, sans-serif;
+  --font-mono: var(--font-mono-var), ui-monospace, monospace;
+
+  --radius-xl2: 1.5rem;
+  --radius-xl3: 2rem;
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --animate-shimmer: shimmer 1.6s linear infinite;
+  --animate-float-slow: float-slow 9s ease-in-out infinite;
+  --animate-pulse-ring: pulse-ring 2.4s var(--ease-out-expo) infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+@keyframes float-slow {
+  0%, 100% { transform: translate3d(0,0,0) scale(1); }
+  50% { transform: translate3d(0,-14px,0) scale(1.04); }
+}
+@keyframes pulse-ring {
+  0% { opacity: .55; transform: scale(.92); }
+  70% { opacity: 0; transform: scale(1.35); }
+  100% { opacity: 0; transform: scale(1.35); }
+}
+
+:root {
+  color-scheme: dark;
+  --safe-b: env(safe-area-inset-bottom, 0px);
+}
+
+html, body {
+  background: var(--color-ink-950);
+  color: var(--color-chalk);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overscroll-behavior-y: none;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-image:
+    radial-gradient(900px 520px at 12% -8%, rgba(255,107,44,.15), transparent 62%),
+    radial-gradient(760px 480px at 96% 4%, rgba(155,123,255,.11), transparent 60%),
+    radial-gradient(1000px 700px at 50% 110%, rgba(76,201,240,.07), transparent 65%);
+  background-attachment: fixed;
+}
+
+::selection { background: var(--color-ember-500); color: #0a0c11; }
+
+/* Scrollbars discrets */
+* { scrollbar-width: thin; scrollbar-color: var(--color-ink-600) transparent; }
+*::-webkit-scrollbar { width: 6px; height: 6px; }
+*::-webkit-scrollbar-thumb { background: var(--color-ink-600); border-radius: 99px; }
+
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar { display: none; }
+}
+
+/* --- Primitives de surface --- */
+@utility glass {
+  background: linear-gradient(160deg, rgba(255,255,255,.055), rgba(255,255,255,.018));
+  border: 1px solid rgba(255,255,255,.075);
+  backdrop-filter: blur(18px) saturate(1.25);
+  -webkit-backdrop-filter: blur(18px) saturate(1.25);
+}
+
+@utility glass-strong {
+  background: linear-gradient(160deg, rgba(255,255,255,.09), rgba(255,255,255,.03));
+  border: 1px solid rgba(255,255,255,.11);
+  backdrop-filter: blur(26px) saturate(1.35);
+  -webkit-backdrop-filter: blur(26px) saturate(1.35);
+}
+
+@utility text-gradient-ember {
+  background: linear-gradient(100deg, var(--color-ember-300), var(--color-ember-500) 55%, var(--color-violet-glow));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@utility grain {
+  position: relative;
+}
+
+@utility tap {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  user-select: none;
+}
+
+@utility num {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+  }
+}

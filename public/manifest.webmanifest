@@ -1,0 +1,14 @@
+{
+  "name": "Forge — Coach musculation",
+  "short_name": "Forge",
+  "description": "Programme de prise de masse et de force, guidé séance après séance.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#06070a",
+  "theme_color": "#06070a",
+  "orientation": "portrait",
+  "lang": "fr",
+  "icons": [
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
