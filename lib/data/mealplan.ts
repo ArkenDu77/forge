@@ -7,40 +7,24 @@ const d = (day: number, slot: MealPlanEntry["slot"], recipeId: string, servings 
   servings,
 });
 
-/** Semaine type — 0 = lundi. Chaque jour vise ~2 400-2 700 kcal et 140 g+ de protéines. */
-export const DEFAULT_MEAL_PLAN: MealPlanEntry[] = [
-  d(0, "petit-dejeuner", "overnight-oats"),
-  d(0, "dejeuner", "chicken-curry-rice"),
-  d(0, "snack", "skyr-bowl"),
-  d(0, "diner", "pasta-bolognese"),
-
-  d(1, "petit-dejeuner", "eggs-avocado-toast"),
-  d(1, "dejeuner", "meal-prep-chicken-rice"),
-  d(1, "snack", "mass-smoothie"),
-  d(1, "diner", "tuna-pasta"),
-
-  d(2, "petit-dejeuner", "overnight-oats"),
-  d(2, "dejeuner", "chili"),
-  d(2, "snack", "cottage-bowl"),
-  d(2, "diner", "salmon-rice"),
-
-  d(3, "petit-dejeuner", "skyr-bowl"),
-  d(3, "dejeuner", "meal-prep-chicken-rice"),
-  d(3, "snack", "mass-smoothie"),
-  d(3, "diner", "beef-sweet-potato"),
-
-  d(4, "petit-dejeuner", "eggs-avocado-toast"),
-  d(4, "dejeuner", "protein-wraps"),
-  d(4, "snack", "skyr-bowl"),
-  d(4, "diner", "chicken-pesto-pasta"),
-
-  d(5, "petit-dejeuner", "overnight-oats"),
-  d(5, "dejeuner", "chili"),
-  d(5, "snack", "cottage-bowl"),
-  d(5, "diner", "lentil-chicken"),
-
-  d(6, "petit-dejeuner", "omelette-cheese"),
-  d(6, "dejeuner", "chicken-sandwich"),
-  d(6, "snack", "mass-smoothie"),
-  d(6, "diner", "veggie-chickpea-bowl"),
+/**
+ * Semaine type — 0 = lundi.
+ * Petit déjeuner et collation sont identiques tous les jours : c'est ce qui rend
+ * la nutrition tenable. Seul le dîner change, pour ne pas se lasser.
+ */
+const DINNERS = [
+  "chicken-pasta",
+  "beef-rice",
+  "tuna-pasta",
+  "salmon-potatoes",
+  "chicken-pasta",
+  "eggs-bread",
+  "beef-rice",
 ];
+
+export const DEFAULT_MEAL_PLAN: MealPlanEntry[] = Array.from({ length: 7 }).flatMap((_, day) => [
+  d(day, "petit-dejeuner", "mass-smoothie"),
+  d(day, "dejeuner", "chicken-rice"),
+  d(day, "snack", "skyr-bowl"),
+  d(day, "diner", DINNERS[day]),
+]);

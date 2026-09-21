@@ -4,20 +4,20 @@ import Link from "next/link";
 import { motion } from "motion/react";
 import { useMemo } from "react";
 import { Page } from "@/components/AppShell";
-import { Badge, Button, Card, cx, SectionTitle } from "@/components/ui/primitives";
+import { Badge, Button, Card, cx } from "@/components/ui/primitives";
 import { Icon } from "@/components/ui/Icon";
-import { Counter, Dots, MacroBar, ProgressRing } from "@/components/ui/progress";
+import { Counter, Dots, MacroBar } from "@/components/ui/progress";
 import { Sparkline } from "@/components/charts/Charts";
-import { ExerciseFigure } from "@/components/exercise/Figure";
-import { useApp, useTargets, useTotalXp } from "@/lib/store";
-import { nextDay } from "@/lib/session";
+import { ExerciseMedia } from "@/components/exercise/ExerciseMedia";
+import { useApp, useTargets } from "@/lib/store";
+import { dayForToday, doneThisWeek, upcomingDay, whenWords } from "@/lib/session";
+import { adaptationLabel } from "@/lib/data/program";
 import { ex } from "@/lib/data/exercises";
-import { dashboardHeadline, tipOfTheDay } from "@/lib/coach";
-import { currentStreak, weeklySessions } from "@/lib/progression";
-import { levelFor } from "@/lib/gamification";
-import { addMacros, emptyMacros } from "@/lib/nutrition";
-import { getRecipe } from "@/lib/data/recipes";
-import { greeting, kg, today } from "@/lib/format";
+import { SLOTS, getRecipe } from "@/lib/data/recipes";
+import { addMacros, calorieAdjustment, emptyMacros, weightTrend } from "@/lib/nutrition";
+import { historyFor, workingWeight } from "@/lib/progression";
+import { weeksSince } from "@/lib/projection";
+import { greeting, kg, nf, today } from "@/lib/format";
 
 export default function Dashboard() {
   const profile = useApp((s) => s.profile)!;
@@ -25,101 +25,91 @@ export default function Dashboard() {
   const weights = useApp((s) => s.weights);
   const meals = useApp((s) => s.meals);
   const mealPlan = useApp((s) => s.mealPlan);
+  const creatine = useApp((s) => s.creatine);
+  const toggleCreatine = useApp((s) => s.toggleCreatine);
   const active = useApp((s) => s.active);
   const targets = useTargets()!;
-  const xp = useTotalXp();
 
-  const day = useMemo(() => nextDay(sessions), [sessions]);
-  const week = weeklySessions(sessions).length;
-  const streak = currentStreak(sessions);
-  const level = levelFor(xp);
-  const headline = dashboardHeadline(sessions, weights, profile);
-  const tip = tipOfTheDay(sessions, profile, profile.sleepHours);
+  const todayDay = dayForToday();
+  const upcoming = upcomingDay();
+  const week = weeksSince(profile.createdAt) + 1;
+  const adaptation = adaptationLabel(week);
+  const doneWeek = doneThisWeek(sessions).length;
 
-  const eaten = meals.filter((m) => m.date === today()).reduce((a, m) => addMacros(a, m.macros), emptyMacros());
+  const trend = useMemo(() => weightTrend(weights), [weights]);
+  const adjustment = useMemo(() => calorieAdjustment(weights, profile), [weights, profile]);
 
-  const recentPrs = sessions
-    .flatMap((s) => s.prs.map((p) => ({ ...p, date: s.date })))
-    .sort((a, b) => (a.date < b.date ? 1 : -1))
-    .slice(0, 3);
+  const dayMeals = meals.filter((m) => m.date === today());
+  const eaten = dayMeals.reduce((a, m) => addMacros(a, m.macros), emptyMacros());
+  const todayIdx = (new Date().getDay() + 6) % 7;
+  const plannedToday = mealPlan.filter((m) => m.day === todayIdx);
+  const creatineTaken = creatine.includes(today());
 
-  const weightSeries = weights.slice(-12).map((w) => w.kg);
   const startWeight = weights[0]?.kg ?? profile.weightKg;
-  const currentWeight = weights[weights.length - 1]?.kg ?? profile.weightKg;
-  const goalProgress =
-    profile.targetWeightKg !== startWeight
-      ? Math.min(1, Math.max(0, (currentWeight - startWeight) / (profile.targetWeightKg - startWeight)))
-      : 1;
+  const currentWeight = trend.latest ?? profile.weightKg;
 
-  const todayIndex = (new Date().getDay() + 6) % 7;
-  const nextMeal = mealPlan.find((m) => m.day === todayIndex && m.slot === "diner");
-  const nextRecipe = nextMeal ? getRecipe(nextMeal.recipeId) : undefined;
+  const pullUpHistory = historyFor(sessions, "assisted-pull-up");
+  const benchHistory = historyFor(sessions, "bench-press");
+
+  const sessionInProgress = active && active.dayId === upcoming.day.id;
 
   return (
     <Page>
-      <header className="mb-5 flex items-start justify-between gap-3">
-        <div>
-          <p className="text-[13px] text-chalk-mute">{greeting()}</p>
-          <h1 className="font-display text-[26px] font-extrabold leading-tight">{profile.firstName}</h1>
-        </div>
-        <Link href="/profil" className="tap flex items-center gap-2 rounded-2xl border border-white/10 bg-white/[.04] px-3 py-2">
-          <ProgressRing value={level.progress} size={34} stroke={3.5}>
-            <span className="num text-[11px] font-bold">{level.level}</span>
-          </ProgressRing>
-          <div className="text-left">
-            <p className="text-[12px] font-semibold leading-none">{level.name}</p>
-            <p className="num mt-0.5 text-[10px] text-chalk-mute">{xp.toLocaleString("fr-FR")} XP</p>
-          </div>
-        </Link>
+      <header className="mb-5">
+        <p className="text-[13px] text-chalk-mute">{greeting()}</p>
+        <h1 className="font-display text-[26px] font-extrabold leading-tight">{profile.firstName}</h1>
+        {adaptation && (
+          <span className="mt-2 inline-block">
+            <Badge tone="ember">{adaptation}</Badge>
+          </span>
+        )}
       </header>
 
-      <motion.p
-        initial={{ opacity: 0, y: 6 }}
-        animate={{ opacity: 1, y: 0 }}
-        className={cx(
-          "mb-5 font-display text-[19px] font-bold leading-snug",
-          headline.tone === "positif" ? "text-gradient-ember" : "text-chalk"
-        )}
-      >
-        {headline.text}
-      </motion.p>
-
-      {/* ---- Prochaine séance ---- */}
+      {/* ---- Aujourd'hui ---- */}
       <Card className="relative mb-4 overflow-hidden p-0">
-        <div className="pointer-events-none absolute -right-3 -top-3 h-44 w-44 opacity-45">
-          <ExerciseFigure media={ex(day.exercises[0].exerciseId).media} accent={day.accent} className="h-full w-full" showTrail={false} />
-        </div>
-        <div className="relative p-5">
-          <div className="flex items-center gap-2">
-            <Badge tone={day.accent === "ember" ? "ember" : day.accent === "volt" ? "volt" : "violet"}>
-              {active ? "Séance en cours" : "Prochaine séance"}
-            </Badge>
-            {streak >= 2 && (
-              <Badge tone="ember" icon="flame">
-                {streak}
-              </Badge>
-            )}
-          </div>
-          <h2 className="mt-3 font-display text-[27px] font-extrabold leading-none">{day.name}</h2>
-          <p className="mt-1.5 text-[15px] font-semibold text-ember-300">{day.focus}</p>
-          <p className="mt-2 flex items-center gap-3 text-[13px] text-chalk-mute">
-            <span className="flex items-center gap-1.5">
-              <Icon name="clock" size={14} /> {day.estimatedMin} min
-            </span>
-            <span className="flex items-center gap-1.5">
-              <Icon name="dumbbell" size={14} /> {day.exercises.length} exercices
-            </span>
-          </p>
-
-          <div className="mt-5 flex gap-2">
-            <Button size="lg" icon="play" href={`/seance/${day.id}`} className="flex-1">
-              {active ? "Reprendre" : "Commencer"}
+        {todayDay ? (
+          <>
+            <div className="pointer-events-none absolute -right-3 -top-3 h-40 w-40 opacity-40">
+              <ExerciseMedia exercise={ex(todayDay.exercises[0].exerciseId)} accent={todayDay.accent} className="h-full w-full" frame={0.5} />
+            </div>
+            <div className="relative p-5">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-chalk-mute">Aujourd&apos;hui</p>
+              <h2 className="mt-1.5 font-display text-[26px] font-extrabold leading-none">{todayDay.name}</h2>
+              <p className="mt-1.5 text-[15px] font-semibold text-ember-300">{todayDay.focus}</p>
+              <p className="mt-2 flex items-center gap-3 text-[13px] text-chalk-mute">
+                <span className="flex items-center gap-1.5">
+                  <Icon name="clock" size={14} /> {todayDay.estimatedMin} min
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <Icon name="dumbbell" size={14} /> {todayDay.exercises.length} exercices
+                </span>
+              </p>
+              <Button size="xl" full icon="play" href={`/seance/${todayDay.id}`} className="mt-5">
+                {sessionInProgress ? "Reprendre ma séance" : "Commencer ma séance"}
+              </Button>
+            </div>
+          </>
+        ) : (
+          <div className="p-5">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-chalk-mute">Aujourd&apos;hui</p>
+            <h2 className="mt-1.5 font-display text-[26px] font-extrabold leading-none">Repos</h2>
+            <p className="mt-2 text-[14px] leading-relaxed text-chalk-dim">
+              Rien à faire à la salle. Le muscle se construit pendant les jours de repos, pas pendant la séance.
+            </p>
+            <div className="mt-4 flex items-center gap-3 rounded-2xl border border-white/8 bg-white/[.03] px-4 py-3">
+              <Icon name="calendar" size={17} className="text-ember-400" />
+              <div className="flex-1">
+                <p className="text-[12px] text-chalk-mute">Prochaine séance</p>
+                <p className="text-[14px] font-semibold">
+                  {whenWords(upcoming.inDays, upcoming.day.weekday)} — {upcoming.day.name} {upcoming.day.focus}
+                </p>
+              </div>
+            </div>
+            <Button variant="outline" full className="mt-3" href={`/seance/${upcoming.day.id}`}>
+              Voir la séance en avance
             </Button>
-            <Button size="lg" variant="outline" href={`/programme/${day.id}`} aria-label="Voir le détail">
-              <Icon name="eye" size={19} />
-            </Button>
           </div>
-        </div>
+        )}
       </Card>
 
       {/* ---- Semaine ---- */}
@@ -127,117 +117,174 @@ export default function Dashboard() {
         <div>
           <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-chalk-mute">Cette semaine</p>
           <p className="mt-1.5 font-display text-2xl font-extrabold">
-            <Counter value={week} /> <span className="text-chalk-mute">/ {profile.daysAvailable}</span>
+            <Counter value={doneWeek} /> <span className="text-chalk-mute">/ 4</span>
             <span className="ml-1.5 text-sm font-semibold text-chalk-dim">séances</span>
           </p>
         </div>
-        <Dots total={profile.daysAvailable} done={week} />
+        <Dots total={4} done={doneWeek} />
       </Card>
 
-      {/* ---- Poids & objectif ---- */}
+      {/* ---- Poids ---- */}
       <Card className="mb-4 p-5">
-        <div className="flex items-start justify-between">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-chalk-mute">Poids</p>
+        <div className="mt-2 flex items-end justify-between">
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-chalk-mute">Poids actuel</p>
-            <p className="mt-1 font-display text-[32px] font-extrabold leading-none">
-              <Counter value={currentWeight} decimals={1} from={Math.max(0, currentWeight - 6)} />
+            <p className="font-display text-[34px] font-extrabold leading-none">
+              <Counter value={currentWeight} decimals={1} from={Math.max(0, currentWeight - 4)} />
               <span className="ml-1 text-base font-semibold text-chalk-dim">kg</span>
             </p>
-            <p className="mt-1.5 text-[13px] text-chalk-mute">
-              Objectif {kg(profile.targetWeightKg)}
-              {currentWeight !== startWeight && (
-                <span className={cx("ml-2 font-semibold", currentWeight > startWeight ? "text-volt-400" : "text-chalk-dim")}>
-                  {currentWeight > startWeight ? "+" : ""}
-                  {(currentWeight - startWeight).toFixed(1).replace(".", ",")} kg
-                </span>
-              )}
-            </p>
+            <p className="mt-1 text-[12.5px] text-chalk-mute">aujourd&apos;hui</p>
           </div>
-          <div className="flex flex-col items-end gap-2">
-            <ProgressRing value={goalProgress} size={68} stroke={7} tone="volt">
-              <span className="num text-[13px] font-bold">{Math.round(goalProgress * 100)}%</span>
-            </ProgressRing>
-            {weightSeries.length > 2 && <Sparkline values={weightSeries} />}
-          </div>
+          {weights.length > 2 && <Sparkline values={weights.slice(-14).map((w) => w.kg)} />}
         </div>
-        <Link href="/projection" className="tap mt-4 flex items-center gap-2 rounded-2xl border border-white/8 bg-white/[.03] px-3.5 py-3 text-[13px] text-chalk-dim">
-          <Icon name="target" size={16} className="text-ember-400" />
-          <span className="flex-1">Où pourrais-je en être dans 12 semaines ?</span>
-          <Icon name="right" size={15} className="text-chalk-mute" />
+
+        <div className="mt-4 grid grid-cols-3 gap-2 border-t border-white/[.06] pt-4 text-center">
+          {[
+            { l: "Moyenne 7 jours", v: trend.avg7 !== null ? `${nf(trend.avg7, 1)} kg` : "—", strong: true },
+            { l: "Au départ", v: `${nf(startWeight, 1)} kg` },
+            { l: "Objectif", v: `${nf(profile.targetWeightKg, 0)} kg` },
+          ].map((s) => (
+            <div key={s.l}>
+              <p className={cx("num font-display font-bold", s.strong ? "text-[19px] text-gradient-ember" : "text-[17px]")}>
+                {s.v}
+              </p>
+              <p className="mt-0.5 text-[10.5px] leading-tight text-chalk-mute">{s.l}</p>
+            </div>
+          ))}
+        </div>
+
+        {trend.weeklyDeltaKg !== null && (
+          <p className="mt-3 text-[12.5px] text-chalk-mute">
+            {trend.weeklyDeltaKg > 0 ? "+" : ""}
+            {nf(trend.weeklyDeltaKg, 2)} kg sur la dernière semaine. C&apos;est la moyenne qui compte, pas la pesée du
+            jour.
+          </p>
+        )}
+        {adjustment.reason && (
+          <p
+            className={cx(
+              "mt-3 rounded-2xl border px-3.5 py-3 text-[13px] leading-relaxed",
+              adjustment.actionable
+                ? "border-ember-500/25 bg-ember-500/[.07] text-ember-300/90"
+                : "border-white/8 bg-white/[.03] text-chalk-dim"
+            )}
+          >
+            {adjustment.reason}
+          </p>
+        )}
+        <Link
+          href="/progression"
+          className="tap mt-3 flex items-center gap-2 text-[12.5px] text-chalk-mute hover:text-chalk-dim"
+        >
+          <Icon name="chart" size={14} /> Voir toutes mes courbes
+          <Icon name="right" size={13} className="ml-auto" />
         </Link>
       </Card>
 
-      {/* ---- Records ---- */}
-      {recentPrs.length > 0 && (
-        <section className="mb-4">
-          <SectionTitle action={<Link href="/progression" className="text-[12px] text-chalk-mute">Tout voir</Link>}>
-            Records récents
-          </SectionTitle>
-          <div className="space-y-2">
-            {recentPrs.map((pr, i) => (
-              <motion.div
-                key={`${pr.exerciseId}-${pr.date}-${i}`}
-                initial={{ opacity: 0, x: -8 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: i * 0.06 }}
-              >
-                <Link
-                  href={`/progression/${pr.exerciseId}`}
-                  className="tap flex items-center gap-3 rounded-2xl border border-white/[.07] bg-white/[.03] px-4 py-3"
-                >
-                  <span className="grid h-9 w-9 place-items-center rounded-xl bg-ember-500/12 text-ember-300">
-                    <Icon name="trophy" size={17} />
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-semibold">{ex(pr.exerciseId).shortName ?? ex(pr.exerciseId).name}</p>
-                    <p className="text-[12px] text-chalk-mute">
-                      {pr.kind === "charge" ? "Nouvelle charge max" : pr.kind === "1rm" ? "Meilleur 1RM estimé" : "Plus de répétitions"}
-                    </p>
-                  </div>
-                  <span className="num text-sm font-bold text-ember-300">
-                    {pr.kind === "reps" ? `${pr.value} reps` : kg(pr.value)}
-                  </span>
-                </Link>
-              </motion.div>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* ---- Nutrition ---- */}
-      <section className="mb-4">
-        <SectionTitle action={<Link href="/nutrition" className="text-[12px] text-chalk-mute">Détail</Link>}>
-          Nutrition aujourd&apos;hui
-        </SectionTitle>
-        <Card className="space-y-3.5 p-5">
+      {/* ---- Nutrition du jour ---- */}
+      <Card className="mb-4 p-5">
+        <div className="mb-3 flex items-baseline justify-between">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-chalk-mute">Aujourd&apos;hui</p>
+          <Link href="/nutrition" className="text-[12px] text-chalk-mute">
+            Détail
+          </Link>
+        </div>
+        <div className="space-y-3">
           <MacroBar label="Calories" value={eaten.kcal} target={targets.kcal} unit="kcal" tone="ember" />
           <MacroBar label="Protéines" value={eaten.prot} target={targets.prot} unit="g" tone="volt" />
-          {nextRecipe && (
-            <Link
-              href={`/nutrition/recettes/${nextRecipe.slug}`}
-              className="tap mt-1 flex items-center gap-3 rounded-2xl border border-white/[.07] bg-white/[.03] px-3.5 py-3"
-            >
-              <span className="text-xl">{nextRecipe.emoji}</span>
-              <div className="min-w-0 flex-1">
-                <p className="text-[11px] text-chalk-mute">Dîner prévu</p>
-                <p className="truncate text-[13.5px] font-semibold">{nextRecipe.name}</p>
-              </div>
-              <span className="num text-[12px] text-chalk-mute">{nextRecipe.macros.kcal} kcal</span>
-            </Link>
-          )}
-        </Card>
-      </section>
-
-      {/* ---- Conseil ---- */}
-      <Card className="flex gap-3 p-4">
-        <span className={cx("grid h-9 w-9 shrink-0 place-items-center rounded-xl", tip.tone === "attention" ? "bg-ember-500/12 text-ember-300" : "bg-white/[.05] text-chalk-dim")}>
-          <Icon name={tip.tone === "attention" ? "alert" : "spark"} size={17} />
-        </span>
-        <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-chalk-mute">Conseil du jour</p>
-          <p className="mt-1 text-[13.5px] leading-relaxed text-chalk-dim">{tip.text}</p>
         </div>
+
+        <div className="mt-4 space-y-1.5">
+          {SLOTS.map((slot) => {
+            const entry = plannedToday.find((m) => m.slot === slot.id);
+            const r = entry ? getRecipe(entry.recipeId) : null;
+            const eatenIt = r ? dayMeals.some((m) => m.recipeId === r.id) : false;
+            return (
+              <Link
+                key={slot.id}
+                href="/nutrition"
+                className="tap flex items-center gap-2.5 rounded-xl px-1 py-1.5"
+              >
+                <span
+                  className={cx(
+                    "grid h-5 w-5 shrink-0 place-items-center rounded-md border",
+                    eatenIt ? "border-volt-500 bg-volt-500 text-ink-950" : "border-white/20"
+                  )}
+                >
+                  {eatenIt && <Icon name="check" size={12} strokeWidth={3} />}
+                </span>
+                <span className={cx("text-[13px]", eatenIt ? "text-chalk-mute line-through" : "text-chalk-dim")}>
+                  {slot.label}
+                </span>
+                <span className="ml-auto truncate text-[12px] text-chalk-mute">{r?.name}</span>
+              </Link>
+            );
+          })}
+        </div>
+
+        <button
+          onClick={() => toggleCreatine()}
+          className={cx(
+            "tap mt-4 flex w-full items-center gap-3 rounded-2xl border px-4 py-3 text-left transition",
+            creatineTaken ? "border-volt-500/40 bg-volt-500/[.08]" : "border-white/10 bg-white/[.03]"
+          )}
+        >
+          <span
+            className={cx(
+              "grid h-8 w-8 shrink-0 place-items-center rounded-xl",
+              creatineTaken ? "bg-volt-500 text-ink-950" : "bg-white/[.06] text-chalk-mute"
+            )}
+          >
+            <Icon name={creatineTaken ? "check" : "plus"} size={16} strokeWidth={2.4} />
+          </span>
+          <div className="flex-1">
+            <p className="text-[13.5px] font-semibold">5 g de créatine</p>
+            <p className="text-[11.5px] text-chalk-mute">
+              {creatineTaken ? "Prise aujourd'hui" : "N'importe quand dans la journée, avec un repas"}
+            </p>
+          </div>
+        </button>
       </Card>
+
+      {/* ---- Progression ---- */}
+      {(pullUpHistory.length > 0 || benchHistory.length > 0) && (
+        <Card className="p-5">
+          <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-chalk-mute">Où tu en es</p>
+          <div className="space-y-3">
+            {benchHistory.length > 0 && (
+              <Row
+                label="Développé couché"
+                value={`${nf(workingWeight(benchHistory[0].sets), 1)} kg`}
+                start={`${nf(workingWeight(benchHistory[benchHistory.length - 1].sets), 1)} kg au départ`}
+                href="/progression/bench-press"
+              />
+            )}
+            {pullUpHistory.length > 0 && (
+              <Row
+                label="Tractions assistées"
+                value={`${Math.max(...pullUpHistory[0].sets.map((s) => s.reps))} reps`}
+                start={`${Math.max(...pullUpHistory[pullUpHistory.length - 1].sets.map((s) => s.reps))} au départ`}
+                href="/progression/assisted-pull-up"
+              />
+            )}
+          </div>
+        </Card>
+      )}
     </Page>
+  );
+}
+
+function Row({ label, value, start, href }: { label: string; value: string; start: string; href: string }) {
+  return (
+    <motion.div initial={{ opacity: 0, x: -6 }} animate={{ opacity: 1, x: 0 }}>
+      <Link href={href} className="tap flex items-center gap-3 rounded-2xl border border-white/[.06] bg-white/[.02] px-4 py-3">
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-[13.5px] font-semibold">{label}</p>
+          <p className="text-[11.5px] text-chalk-mute">{start}</p>
+        </div>
+        <span className="num text-[15px] font-bold text-ember-300">{value}</span>
+        <Icon name="right" size={15} className="text-chalk-mute" />
+      </Link>
+    </motion.div>
   );
 }

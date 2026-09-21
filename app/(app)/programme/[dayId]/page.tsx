@@ -3,40 +3,57 @@
 import Link from "next/link";
 import { motion } from "motion/react";
 import { notFound } from "next/navigation";
-import { use } from "react";
+import { use, useMemo } from "react";
 import { Page, TopBar } from "@/components/AppShell";
-import { ExerciseFigure } from "@/components/exercise/Figure";
+import { ExerciseMedia } from "@/components/exercise/ExerciseMedia";
 import { Icon } from "@/components/ui/Icon";
-import { Badge, Button, Card, InfoNote, SectionTitle } from "@/components/ui/primitives";
-import { getDay } from "@/lib/data/program";
+import { Badge, Button, Card, InfoNote } from "@/components/ui/primitives";
+import { adaptForWeek, getDay } from "@/lib/data/program";
 import { ex } from "@/lib/data/exercises";
+import { coachingFor } from "@/lib/data/coaching";
 import { muscleName } from "@/lib/data/muscles";
 import { useApp } from "@/lib/store";
 import { historyFor, recommendLoad } from "@/lib/progression";
-import { lastSessionFor } from "@/lib/session";
-import { mmss, relativeDay } from "@/lib/format";
+import { lastSessionFor, weekdayLabel } from "@/lib/session";
+import { weeksSince } from "@/lib/projection";
+import { relativeDay } from "@/lib/format";
 import { SAFETY } from "@/lib/copy";
+import type { ProgramExercise } from "@/lib/types";
+
+function goalWords(plan: ProgramExercise) {
+  if (plan.metric === "distance") return `${plan.sets} passages de ${plan.distMin} à ${plan.distMax} m`;
+  if (plan.metric === "duration") return `${plan.sets} fois ${plan.secMin} à ${plan.secMax} s`;
+  return `${plan.sets} séries de ${plan.repMin} à ${plan.repMax} répétitions${plan.perSide ? " par côté" : ""}`;
+}
+
+function restWords(sec: number) {
+  if (sec < 60) return `${sec} s`;
+  const m = Math.floor(sec / 60);
+  const s = sec % 60;
+  return s === 0 ? `${m} min` : `${m} min ${s}`;
+}
 
 export default function DayPage({ params }: PageProps<"/programme/[dayId]">) {
   const { dayId } = use(params);
-  const day = getDay(dayId);
   const profile = useApp((s) => s.profile);
   const sessions = useApp((s) => s.sessions);
+  const base = getDay(dayId);
+  const week = profile ? weeksSince(profile.createdAt) + 1 : 99;
+  const day = useMemo(() => (base ? adaptForWeek(base, week) : undefined), [base, week]);
 
   if (!day) notFound();
   const last = lastSessionFor(sessions, day.id);
-  const totalSets = day.exercises.reduce((a, e) => a + e.sets, 0);
   const muscles = [...new Set(day.exercises.flatMap((e) => ex(e.exerciseId).primary))];
 
   return (
     <Page>
-      <TopBar title={day.name} subtitle={`Jour ${day.index} · ${day.focus}`} back="/programme" />
+      <TopBar title={`${day.name} — ${day.focus}`} subtitle={weekdayLabel(day.weekday)} back="/programme" />
 
       <Card className="mb-4 p-5">
         <div className="grid grid-cols-3 gap-3 text-center">
           {[
             { l: "Exercices", v: day.exercises.length },
-            { l: "Séries", v: totalSets },
+            { l: "Séries", v: day.exercises.reduce((a, e) => a + e.sets, 0) },
             { l: "Durée", v: `${day.estimatedMin} min` },
           ].map((s) => (
             <div key={s.l}>
@@ -52,7 +69,7 @@ export default function DayPage({ params }: PageProps<"/programme/[dayId]">) {
         </div>
         {last && (
           <p className="mt-3 text-[12.5px] text-chalk-mute">
-            Dernière fois : {relativeDay(last.date.slice(0, 10))} · {Math.round(last.durationSec / 60)} min
+            Dernière fois : {relativeDay(last.date.slice(0, 10)).toLowerCase()} · {Math.round(last.durationSec / 60)} min
           </p>
         )}
       </Card>
@@ -61,28 +78,43 @@ export default function DayPage({ params }: PageProps<"/programme/[dayId]">) {
         Commencer la séance
       </Button>
 
-      <SectionTitle>Déroulé</SectionTitle>
+      {/* Échauffement */}
+      <Card className="mb-4 flex items-start gap-3 p-4">
+        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-ember-500/12 text-ember-300">
+          <Icon name="clock" size={18} />
+        </span>
+        <div>
+          <p className="text-[11px] uppercase tracking-[0.14em] text-chalk-mute">On commence par</p>
+          <p className="text-[15px] font-semibold">
+            {day.warmup.minutes} minutes de {day.warmup.machine === "tapis" ? "tapis de course" : "vélo"}
+          </p>
+          <p className="mt-0.5 text-[12.5px] leading-relaxed text-chalk-dim">{day.warmup.instruction}</p>
+        </div>
+      </Card>
+
+      <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-chalk-mute">Puis, dans l&apos;ordre</p>
       <div className="space-y-2.5">
         {day.exercises.map((p, i) => {
           const exercise = ex(p.exerciseId);
           const history = historyFor(sessions, p.exerciseId);
           const reco = profile ? recommendLoad(exercise, p, history, profile) : null;
           return (
-            <motion.div key={p.exerciseId + i} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }}>
+            <motion.div key={p.exerciseId + i} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.03 }}>
               <Link href={`/exercice/${exercise.slug}`} className="tap block">
                 <Card className="flex items-center gap-3 p-3">
                   <div className="h-16 w-20 shrink-0 overflow-hidden rounded-xl bg-white/[.03]">
-                    <ExerciseFigure media={exercise.media} className="h-full w-full" showTrail={false} frame={0.5} accent={day.accent} />
+                    <ExerciseMedia exercise={exercise} className="h-full w-full" frame={0.5} accent={day.accent} />
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
                       <span className="num text-[10.5px] font-bold text-chalk-mute">{String(i + 1).padStart(2, "0")}</span>
-                      {p.kind === "force" && <Badge tone="ember">Force</Badge>}
+                      {p.warmup && <Badge tone="ember">Échauffement guidé</Badge>}
                     </div>
                     <p className="truncate text-[14.5px] font-semibold">{exercise.name}</p>
-                    <p className="num text-[12.5px] text-chalk-mute">
-                      {p.sets} × {p.repMin}-{p.repMax} · repos {mmss(p.restSec)}
-                      {reco && ` · ${reco.display}`}
+                    <p className="text-[12.5px] text-chalk-mute">{goalWords(p)}</p>
+                    <p className="text-[12px] text-chalk-mute">
+                      Repos {restWords(p.restSec)}
+                      {reco && exercise.loadModel !== "bodyweight" ? ` · ${reco.display}` : ""}
                     </p>
                   </div>
                   <Icon name="right" size={16} className="shrink-0 text-chalk-mute" />
@@ -95,8 +127,8 @@ export default function DayPage({ params }: PageProps<"/programme/[dayId]">) {
 
       <div className="mt-5 space-y-3">
         <InfoNote>
-          Les charges affichées sont recalculées à chaque séance à partir de ton historique, de tes répétitions et de la
-          difficulté ressentie.
+          Les poids affichés sont recalculés à chaque séance à partir de ce que tu as réussi la fois d&apos;avant. Tu
+          n&apos;as rien à décider toi-même.
         </InfoNote>
         {day.exercises.some((p) => ex(p.exerciseId).needsSpotter) && <InfoNote tone="warn">{SAFETY.spotter}</InfoNote>}
       </div>
