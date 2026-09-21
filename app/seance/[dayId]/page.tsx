@@ -454,7 +454,13 @@ export default function WorkoutPage({ params }: PageProps<"/seance/[dayId]">) {
 
             {logging ? (
               <motion.div className="mt-5" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                <SetLogger plan={plan} isWarmup={inWarmup} onSubmit={handleSubmit} onCancel={() => setLogging(false)} />
+                <SetLogger
+                  plan={plan}
+                  isWarmup={inWarmup}
+                  warmupReps={currentWarmup?.reps}
+                  onSubmit={handleSubmit}
+                  onCancel={() => setLogging(false)}
+                />
               </motion.div>
             ) : (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-5 space-y-3">
@@ -474,7 +480,11 @@ export default function WorkoutPage({ params }: PageProps<"/seance/[dayId]">) {
                           : `${plan.repMin} à ${plan.repMax} répétitions`}
                   </p>
                   {inWarmup && currentWarmup && (
-                    <p className="mt-1.5 text-[13.5px] text-chalk-dim">{currentWarmup.note}</p>
+                    <p className="mt-1.5 text-[13.5px] text-chalk-dim">
+                      {weight >= workingWeightValue
+                        ? "Même poids que tes séries : c'est déjà le minimum possible. Sers-t'en pour répéter le mouvement tranquillement."
+                        : currentWarmup.note}
+                    </p>
                   )}
                 </Card>
 

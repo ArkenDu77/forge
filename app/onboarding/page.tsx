@@ -105,7 +105,7 @@ export default function Onboarding() {
   const steps: { title: string; sub?: string; body: React.ReactNode; valid?: boolean }[] = [
     {
       title: "Bienvenue",
-      sub: "Quatre écrans, et on commence.",
+      sub: "Cinq écrans, et on commence.",
       valid: d.firstName.trim().length > 0,
       body: (
         <div className="space-y-5">

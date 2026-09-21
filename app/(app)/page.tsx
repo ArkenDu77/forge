@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 import { motion } from "motion/react";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Page } from "@/components/AppShell";
-import { Badge, Button, Card, cx } from "@/components/ui/primitives";
+import { Badge, Button, Card, cx, Sheet } from "@/components/ui/primitives";
 import { Icon } from "@/components/ui/Icon";
 import { Counter, Dots, MacroBar } from "@/components/ui/progress";
 import { Sparkline } from "@/components/charts/Charts";
@@ -27,8 +27,11 @@ export default function Dashboard() {
   const mealPlan = useApp((s) => s.mealPlan);
   const creatine = useApp((s) => s.creatine);
   const toggleCreatine = useApp((s) => s.toggleCreatine);
+  const addWeight = useApp((s) => s.addWeight);
   const active = useApp((s) => s.active);
   const targets = useTargets()!;
+  const [weighOpen, setWeighOpen] = useState(false);
+  const [draftWeight, setDraftWeight] = useState<number | null>(null);
 
   const todayDay = dayForToday();
   const upcoming = upcomingDay();
@@ -47,6 +50,8 @@ export default function Dashboard() {
 
   const startWeight = weights[0]?.kg ?? profile.weightKg;
   const currentWeight = trend.latest ?? profile.weightKg;
+  const weighedToday = weights.some((w) => w.date === today());
+  const neverWeighed = weights.length === 0;
 
   const pullUpHistory = historyFor(sessions, "assisted-pull-up");
   const benchHistory = historyFor(sessions, "bench-press");
@@ -133,7 +138,9 @@ export default function Dashboard() {
               <Counter value={currentWeight} decimals={1} from={Math.max(0, currentWeight - 4)} />
               <span className="ml-1 text-base font-semibold text-chalk-dim">kg</span>
             </p>
-            <p className="mt-1 text-[12.5px] text-chalk-mute">aujourd&apos;hui</p>
+            <p className="mt-1 text-[12.5px] text-chalk-mute">
+              {neverWeighed ? "d'après ton profil" : weighedToday ? "pesé aujourd'hui" : "dernière pesée"}
+            </p>
           </div>
           {weights.length > 2 && <Sparkline values={weights.slice(-14).map((w) => w.kg)} />}
         </div>
@@ -171,6 +178,21 @@ export default function Dashboard() {
           >
             {adjustment.reason}
           </p>
+        )}
+        {!weighedToday && (
+          <Button
+            variant="outline"
+            full
+            size="lg"
+            icon="plus"
+            className="mt-4"
+            onClick={() => {
+              setDraftWeight(currentWeight);
+              setWeighOpen(true);
+            }}
+          >
+            Enregistrer ma pesée du jour
+          </Button>
         )}
         <Link
           href="/progression"
@@ -270,6 +292,45 @@ export default function Dashboard() {
           </div>
         </Card>
       )}
+      <Sheet open={weighOpen} onClose={() => setWeighOpen(false)} title="Ta pesée du jour">
+        <div className="space-y-4 pb-4">
+          <p className="text-[13.5px] leading-relaxed text-chalk-dim">
+            Pèse-toi le matin, après être allé aux toilettes, avant de manger ou de boire. C&apos;est le seul moment
+            comparable d&apos;un jour à l&apos;autre.
+          </p>
+          <div className="rounded-3xl border border-white/10 bg-white/[.03] p-5 text-center">
+            <p className="num font-display text-4xl font-extrabold">
+              {nf(draftWeight ?? currentWeight, 1)}
+              <span className="ml-1 text-lg text-chalk-dim">kg</span>
+            </p>
+            <input
+              type="range"
+              min={40}
+              max={140}
+              step={0.1}
+              value={draftWeight ?? currentWeight}
+              onChange={(e) => setDraftWeight(Number(e.target.value))}
+              className="mt-4 h-1.5 w-full appearance-none rounded-full bg-white/10 accent-[#ff6b2c]"
+              aria-label="Poids du jour"
+            />
+          </div>
+          <p className="text-center text-[12px] text-chalk-mute">
+            Ne t&apos;inquiète pas des variations d&apos;un jour sur l&apos;autre : c&apos;est la moyenne sur sept
+            jours qui compte.
+          </p>
+          <Button
+            full
+            size="lg"
+            icon="check"
+            onClick={() => {
+              addWeight(Math.round((draftWeight ?? currentWeight) * 10) / 10);
+              setWeighOpen(false);
+            }}
+          >
+            Enregistrer
+          </Button>
+        </div>
+      </Sheet>
     </Page>
   );
 }

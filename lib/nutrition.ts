@@ -31,8 +31,8 @@ export function computeTargets(profile: Profile, extraKcal = 0): NutritionTarget
   const maint = maintenance(profile);
   const gaining = profile.targetWeightKg >= profile.weightKg;
 
-  // +250 g/semaine ≈ +275 kcal/jour. Borné pour rester raisonnable.
-  const surplus = gaining ? clamp(Math.round(maint * 0.11), 200, 400) : -clamp(Math.round(maint * 0.15), 300, 600);
+  // +250 à +300 g/semaine ≈ +300 kcal/jour. Borné pour rester raisonnable.
+  const surplus = gaining ? clamp(Math.round(maint * 0.13), 250, 450) : -clamp(Math.round(maint * 0.15), 300, 600);
 
   const kcal = Math.round((maint + surplus + extraKcal) / 10) * 10;
   const proteinPerKg = gaining ? 2.05 : 2.3;

@@ -119,7 +119,12 @@ const RESERVE_OPTIONS = [
   { v: 4, emoji: "😌", label: "4 ou +", hint: "Beaucoup trop facile. On montera le poids." },
 ];
 
-function optionsFor(plan: ProgramExercise): { values: number[]; unit: string } {
+function optionsFor(plan: ProgramExercise, warmupReps?: number): { values: number[]; unit: string } {
+  // Une série d'échauffement a sa propre consigne : les choix tournent autour d'elle.
+  if (warmupReps) {
+    const values = [warmupReps - 3, warmupReps - 1, warmupReps, warmupReps + 2].filter((n) => n > 0);
+    return { values: [...new Set(values)], unit: "répétitions" };
+  }
   if (plan.metric === "distance") {
     const lo = plan.distMin ?? 10;
     const hi = plan.distMax ?? 30;
@@ -146,18 +151,21 @@ function optionsFor(plan: ProgramExercise): { values: number[]; unit: string } {
 export function SetLogger({
   plan,
   isWarmup,
+  warmupReps,
   onSubmit,
   onCancel,
 }: {
   plan: ProgramExercise;
   isWarmup: boolean;
+  /** consigne de la série d'échauffement en cours */
+  warmupReps?: number;
   onSubmit: (result: { reps?: number; distanceM?: number; seconds?: number; reserve: number; pain: boolean }) => void;
   onCancel: () => void;
 }) {
   const [amount, setAmount] = useState<number | null>(null);
   const [reserve, setReserve] = useState<number | null>(null);
   const [pain, setPain] = useState(false);
-  const { values, unit } = optionsFor(plan);
+  const { values, unit } = optionsFor(plan, isWarmup ? warmupReps : undefined);
   const cols = values.length <= 4 ? values.length : values.length <= 6 ? 3 : 4;
   const max = values[values.length - 1];
 
@@ -173,7 +181,7 @@ export function SetLogger({
     const reserveValue = isWarmup ? 4 : reserve;
     if (reserveValue === null) return;
     onSubmit({
-      reps: plan.metric === "reps" ? amount : undefined,
+      reps: plan.metric === "reps" || isWarmup ? amount : undefined,
       distanceM: plan.metric === "distance" ? amount : undefined,
       seconds: plan.metric === "duration" ? amount : undefined,
       reserve: reserveValue,
