@@ -11,6 +11,9 @@ export const SEG = {
   foot: 13,
   shoulderHalf: 16,
   hipHalf: 9.5,
+  /** Vue de face : les membres partent de l'extérieur du tronc, sinon ils se superposent. */
+  shoulderHalfFront: 21,
+  hipHalfFront: 12,
 };
 
 export type P = [number, number];
@@ -46,10 +49,10 @@ export function buildSkeleton(pose: Pose, view: "side" | "front"): Skeleton {
   const head = polar(neck, SEG.headR, tilt);
 
   if (view === "front") {
-    const shoulderL: P = [shoulder[0] - SEG.shoulderHalf, shoulder[1]];
-    const shoulderR: P = [shoulder[0] + SEG.shoulderHalf, shoulder[1]];
-    const hipL: P = [hip[0] - SEG.hipHalf, hip[1]];
-    const hipR: P = [hip[0] + SEG.hipHalf, hip[1]];
+    const shoulderL: P = [shoulder[0] - SEG.shoulderHalfFront, shoulder[1] + 2];
+    const shoulderR: P = [shoulder[0] + SEG.shoulderHalfFront, shoulder[1] + 2];
+    const hipL: P = [hip[0] - SEG.hipHalfFront, hip[1]];
+    const hipR: P = [hip[0] + SEG.hipHalfFront, hip[1]];
 
     const elbowR = polar(shoulderR, SEG.upper, pose.upperArm);
     const wristR = polar(elbowR, SEG.fore, pose.foreArm);
@@ -130,7 +133,9 @@ export function pingPong(progress: number) {
 
 /**
  * Membre fuselé : capsule dont l'épaisseur va de `w1` (côté `a`) à `w2` (côté `b`),
- * terminée par deux arcs. Beaucoup plus proche d'un corps qu'un trait d'épaisseur
+ * terminée par deux demi-disques bombés vers l'extérieur (sweep 0 : avec sweep 1
+ * les arcs mordaient dans le segment et creusaient une encoche à chaque articulation).
+ * Beaucoup plus proche d'un corps qu'un trait d'épaisseur
  * constante, qui est ce qui donnait l'aspect « bonhomme bâton ».
  */
 export function capsule(a: P, b: P, w1: number, w2: number): string {
@@ -145,9 +150,9 @@ export function capsule(a: P, b: P, w1: number, w2: number): string {
   return [
     `M${q(a[0] + nx * r1, a[1] + ny * r1)}`,
     `L${q(b[0] + nx * r2, b[1] + ny * r2)}`,
-    `A${r2},${r2} 0 0 1 ${q(b[0] - nx * r2, b[1] - ny * r2)}`,
+    `A${r2},${r2} 0 0 0 ${q(b[0] - nx * r2, b[1] - ny * r2)}`,
     `L${q(a[0] - nx * r1, a[1] - ny * r1)}`,
-    `A${r1},${r1} 0 0 1 ${q(a[0] + nx * r1, a[1] + ny * r1)}`,
+    `A${r1},${r1} 0 0 0 ${q(a[0] + nx * r1, a[1] + ny * r1)}`,
     "Z",
   ].join(" ");
 }

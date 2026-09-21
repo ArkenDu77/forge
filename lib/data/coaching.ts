@@ -457,6 +457,360 @@ export const COACHING: Record<string, Coaching> = {
     ],
     checklist: ["Hanches immobiles", "Mouvement d'enroulement, pas de flexion de hanche", "Bras qui ne tirent pas", "Retour lent"],
   },
+  "db-bench-press": {
+    why: "Le développé couché en version haltères : chaque bras travaille seul, donc aucun côté ne triche.",
+    findIt: [
+      "Un banc plat, dans la zone des bancs et des râteliers d'haltères.",
+      "Prends deux haltères identiques, tu les soulèves toi-même : pas besoin de barre ni de crochets.",
+      "C'est l'option la plus simple quand tous les bancs à barre sont pris.",
+    ],
+    simple: [
+      "Assieds-toi au bout du banc, un haltère posé debout sur chaque cuisse.",
+      "Bascule-toi en arrière en donnant une petite impulsion avec les genoux.",
+      "Tu te retrouves allongé, les deux haltères au-dessus de ta poitrine, bras tendus.",
+      "Descends-les lentement jusqu'au niveau de ta poitrine.",
+      "Repousse vers le plafond.",
+      "À la fin de la série, repose les haltères sur tes cuisses puis redresse-toi.",
+    ],
+    checklist: ["Pieds bien à plat au sol", "Épaules posées sur le banc", "Poignets droits, pas cassés en arrière", "Descente lente, remontée franche"],
+  },
+  "converging-chest-press": {
+    why: "Le développé couché en version machine : aucun équilibre à gérer, tu pousses, c'est tout.",
+    findIt: [
+      "Une machine où tu es assis le dos calé, avec deux poignées au niveau de la poitrine.",
+      "Les bras de la machine se rapprochent quand tu pousses, d'où le nom.",
+      "Une pile de poids avec une goupille sur le côté.",
+    ],
+    simple: [
+      "Règle la hauteur du siège pour que les poignées soient au niveau de ta poitrine.",
+      "Assieds-toi, dos bien collé au dossier.",
+      "Attrape les deux poignées.",
+      "Pousse devant toi jusqu'à ce que tes bras soient presque tendus.",
+      "Reviens lentement, sans laisser les poids retomber d'un coup.",
+    ],
+    checklist: ["Siège réglé à hauteur de poitrine", "Dos collé au dossier", "Coudes qui ne descendent pas trop bas", "Retour freiné"],
+  },
+  "cable-fly": {
+    why: "Étire et resserre les pectoraux. C'est le mouvement qui creuse le milieu de la poitrine.",
+    findIt: [
+      "Deux colonnes de poulies qui se font face, avec des poignées réglables en hauteur.",
+      "Règle les deux poulies en haut, prends une poignée dans chaque main.",
+      "Place-toi au milieu, un pied légèrement en avant.",
+    ],
+    simple: [
+      "Attrape une poignée de chaque main, bras écartés en croix.",
+      "Avance d'un pas pour mettre les câbles en tension.",
+      "Ramène tes deux mains devant toi, comme si tu serrais quelqu'un dans tes bras.",
+      "Laisse les bras repartir en arrière, lentement, jusqu'à sentir l'étirement.",
+    ],
+    checklist: ["Coudes légèrement pliés et figés", "Buste penché très légèrement en avant", "Mouvement lent dans les deux sens", "Pas de douleur à l'avant de l'épaule"],
+  },
+  dips: {
+    why: "Un des meilleurs exercices pour le bas des pectoraux et les triceps, avec ton seul poids de corps.",
+    findIt: [
+      "Deux barres parallèles à hauteur de hanches, souvent sur la même station que la barre de traction.",
+      "Certaines salles ont une machine assistée : tu poses les genoux sur un coussin et la machine t'aide.",
+      "Si tu n'en trouves pas, demande « les barres à dips » à l'accueil.",
+    ],
+    simple: [
+      "Attrape une barre de chaque main et monte, bras tendus, pieds dans le vide.",
+      "Plie les coudes et descends jusqu'à ce que tes épaules arrivent au niveau de tes coudes.",
+      "Remonte en poussant sur tes bras jusqu'à les tendre.",
+      "Si c'est trop dur : utilise la machine assistée, ou pose les pieds au sol pour t'aider.",
+    ],
+    checklist: ["Buste légèrement penché en avant", "Descente contrôlée, pas de chute", "Épaules qui ne remontent pas vers les oreilles", "Aucune douleur d'épaule"],
+  },
+  "overhead-press": {
+    why: "Le meilleur exercice pour des épaules larges et fortes. Tu pousses une barre au-dessus de ta tête.",
+    findIt: [
+      "Une barre olympique et un support à hauteur de poitrine, ou un rack à squat.",
+      "Ça se fait debout, dans la zone des barres libres.",
+      "La barre seule pèse déjà 20 kg : c'est souvent bien suffisant au début.",
+    ],
+    simple: [
+      "Place-toi debout sous la barre, mains un peu plus larges que tes épaules.",
+      "Sors la barre du support et tiens-la au niveau des clavicules.",
+      "Pousse la barre droit au-dessus de ta tête jusqu'à tendre les bras.",
+      "Redescends lentement jusqu'aux clavicules.",
+    ],
+    checklist: ["Fesses et abdos serrés pour ne pas cambrer", "Barre qui monte à la verticale, pas en avant", "Tête qui recule légèrement au passage de la barre", "Bras tendus en haut"],
+  },
+  "shoulder-press-machine": {
+    why: "Le développé épaules en version machine : le trajet est guidé, tu ne peux pas te tromper.",
+    findIt: [
+      "Une machine où tu es assis avec deux poignées au niveau des oreilles.",
+      "Le dossier est presque vertical.",
+      "Souvent placée à côté des autres machines de haut du corps.",
+    ],
+    simple: [
+      "Règle le siège pour que les poignées soient au niveau de tes épaules.",
+      "Assieds-toi, dos collé au dossier.",
+      "Pousse les poignées vers le plafond jusqu'à presque tendre les bras.",
+      "Redescends lentement jusqu'au niveau des épaules.",
+    ],
+    checklist: ["Siège réglé avant de commencer", "Dos plaqué au dossier", "Pas de blocage sec des coudes en haut", "Retour freiné"],
+  },
+  "cable-lateral-raise": {
+    why: "Élargit le côté de l'épaule. C'est ce qui donne les épaules rondes vues de face.",
+    findIt: [
+      "Une colonne de poulie réglée tout en bas, avec une petite poignée.",
+      "Tu te places debout à côté, la poulie du côté opposé au bras qui travaille.",
+      "Très peu de poids suffit : c'est un petit muscle.",
+    ],
+    simple: [
+      "Attrape la poignée avec la main la plus éloignée de la machine, bras le long du corps.",
+      "Lève le bras sur le côté jusqu'à ce qu'il soit à hauteur d'épaule.",
+      "Redescends lentement.",
+      "Fais toutes les répétitions d'un côté, puis change de côté.",
+    ],
+    checklist: ["Bras presque tendu, coude à peine plié", "Montée jusqu'à l'horizontale, pas plus haut", "Aucun élan du buste", "Descente lente"],
+  },
+  "pull-up": {
+    why: "L'exercice roi pour le dos et la poigne. C'est ta référence de force sur le haut du corps.",
+    findIt: [
+      "Une barre fixe horizontale, assez haute pour que tes pieds ne touchent pas le sol.",
+      "Souvent sur la même station que les barres à dips.",
+      "Un marchepied ou une caisse à côté pour l'atteindre.",
+    ],
+    simple: [
+      "Attrape la barre, mains un peu plus larges que tes épaules, paumes vers l'avant.",
+      "Laisse-toi pendre, bras tendus.",
+      "Tire-toi vers le haut jusqu'à ce que ton menton passe au-dessus de la barre.",
+      "Redescends lentement jusqu'aux bras tendus.",
+      "Si tu n'en fais pas encore : la version aidée par la machine compte tout autant.",
+    ],
+    checklist: ["Pouces refermés autour de la barre", "Bras complètement tendus en bas", "Aucun balancement de jambes", "Descente freinée jusqu'au bout"],
+  },
+  "machine-row": {
+    why: "Épaissit le milieu du dos, assis et le buste calé : ton bas du dos ne travaille pas.",
+    findIt: [
+      "Une machine assise avec un coussin pour la poitrine et deux poignées devant toi.",
+      "Tu es face à la machine, pas dos à elle.",
+      "Une pile de poids sur le côté.",
+    ],
+    simple: [
+      "Règle le siège pour que les poignées soient au niveau de ta poitrine.",
+      "Assieds-toi, poitrine contre le coussin.",
+      "Attrape les poignées, bras tendus.",
+      "Tire vers toi en amenant les coudes en arrière, jusqu'à ce que tes mains touchent tes côtes.",
+      "Reviens lentement bras tendus.",
+    ],
+    checklist: ["Poitrine qui reste collée au coussin", "Épaules qui descendent avant de tirer", "Coudes qui longent le corps", "Retour complet, bras tendus"],
+  },
+  "t-bar-row": {
+    why: "Épaissit le milieu du dos avec de la charge lourde. Le buste est penché, le dos bien droit.",
+    findIt: [
+      "Une barre fixée au sol par une extrémité, avec des poignées en V au milieu.",
+      "Parfois une machine avec un support pour la poitrine : prends celle-là en priorité.",
+      "Tu charges des disques sur le bout libre de la barre.",
+    ],
+    simple: [
+      "Place-toi à cheval au-dessus de la barre, pieds écartés comme tes épaules.",
+      "Plie légèrement les genoux et penche le buste en avant, dos bien droit.",
+      "Attrape les poignées, bras tendus.",
+      "Tire la barre vers ton ventre en ramenant les coudes en arrière.",
+      "Redescends lentement bras tendus.",
+    ],
+    checklist: ["Dos droit, jamais arrondi", "Buste qui ne se relève pas pendant la série", "Coudes qui longent le corps", "Charge posée entre les séries"],
+  },
+  "face-pull": {
+    why: "Muscle l'arrière de l'épaule et corrige la posture des épaules qui tombent en avant.",
+    findIt: [
+      "Une poulie réglée à hauteur de visage, avec une corde à deux brins.",
+      "Tu tires vers ton visage, d'où le nom.",
+      "Très léger : c'est un exercice de posture, pas de force.",
+    ],
+    simple: [
+      "Attrape un brin de la corde dans chaque main, paumes vers le haut.",
+      "Recule d'un ou deux pas pour mettre le câble en tension.",
+      "Tire la corde vers ton front en écartant les mains.",
+      "Tes coudes finissent hauts, à hauteur d'épaules.",
+      "Reviens lentement bras tendus.",
+    ],
+    checklist: ["Poulie à hauteur de visage", "Coudes hauts pendant tout le mouvement", "Aucun élan du buste", "Charge légère, mouvement propre"],
+  },
+  "biceps-curl": {
+    why: "L'exercice le plus direct pour grossir les biceps : tu plies le bras contre une charge.",
+    findIt: [
+      "Deux haltères au râtelier, ou une barre courte droite ou ondulée.",
+      "Ça se fait debout, n'importe où dans la salle.",
+      "Aucun réglage nécessaire.",
+    ],
+    simple: [
+      "Debout, un haltère dans chaque main, bras le long du corps, paumes vers l'avant.",
+      "Plie les coudes pour monter les haltères vers tes épaules.",
+      "Redescends lentement jusqu'aux bras tendus.",
+    ],
+    checklist: ["Coudes collés au corps", "Aucun mouvement du buste", "Descente lente jusqu'aux bras tendus", "Poignets droits"],
+  },
+  "cable-curl": {
+    why: "Le curl avec une tension constante du début à la fin, y compris en bas du mouvement.",
+    findIt: [
+      "Une poulie réglée tout en bas, avec une barre droite ou une corde.",
+      "Tu te places debout face à la machine, à un pas.",
+    ],
+    simple: [
+      "Attrape la barre de la poulie basse à deux mains, paumes vers le haut.",
+      "Tiens-toi debout, bras tendus, coudes contre le corps.",
+      "Plie les coudes pour monter la barre vers tes épaules.",
+      "Redescends lentement jusqu'aux bras tendus.",
+    ],
+    checklist: ["Coudes qui restent contre les côtes", "Buste immobile", "Tension jamais relâchée en bas", "Descente lente"],
+  },
+  "skull-crusher": {
+    why: "Cible la longue portion du triceps, celle qui donne du volume à l'arrière du bras.",
+    findIt: [
+      "Un banc plat et une barre courte ondulée, ou deux haltères légers.",
+      "Ça se fait allongé, dans la zone des bancs.",
+      "Commence très léger : les coudes sont sensibles sur ce mouvement.",
+    ],
+    simple: [
+      "Allonge-toi sur le banc, barre tenue bras tendus au-dessus de ta poitrine.",
+      "Plie uniquement les coudes pour descendre la barre vers ton front.",
+      "Tes bras du haut restent immobiles, à la verticale.",
+      "Retends les bras pour remonter la barre.",
+    ],
+    checklist: ["Bras du haut figés à la verticale", "Descente lente près du front", "Coudes qui ne s'écartent pas", "Arrête si les coudes chauffent"],
+  },
+  squat: {
+    why: "Le meilleur exercice pour les cuisses et les fessiers. C'est aussi ce qui fait progresser tout le reste.",
+    findIt: [
+      "Une cage avec une barre posée sur des crochets à hauteur de poitrine.",
+      "On l'appelle rack à squat ou cage à squat.",
+      "Les barres de sécurité se règlent à hauteur de hanches : prends le temps de les mettre.",
+    ],
+    simple: [
+      "Place la barre sur le haut de ton dos, pas sur ta nuque.",
+      "Décolle la barre des crochets et recule de deux pas.",
+      "Pieds écartés comme tes épaules, pointes légèrement vers l'extérieur.",
+      "Descends en poussant les fesses en arrière, comme pour t'asseoir.",
+      "Descends jusqu'à ce que tes cuisses soient à l'horizontale, puis remonte.",
+    ],
+    checklist: ["Barres de sécurité réglées", "Talons qui restent au sol", "Genoux dans l'axe des pieds", "Dos droit, regard devant"],
+  },
+  "goblet-squat": {
+    why: "Le squat avec un seul haltère tenu devant la poitrine. C'est la version la plus facile à apprendre.",
+    findIt: [
+      "Un seul haltère au râtelier, ou une kettlebell.",
+      "Aucune machine, aucun réglage : tu le fais où tu veux.",
+      "C'est le bon choix si le rack à squat t'intimide encore.",
+    ],
+    simple: [
+      "Tiens un haltère à la verticale contre ta poitrine, à deux mains sous le poids du haut.",
+      "Pieds écartés comme tes épaules.",
+      "Descends en poussant les fesses en arrière, buste bien droit.",
+      "Descends jusqu'à ce que tes cuisses soient à l'horizontale.",
+      "Remonte en poussant dans tes talons.",
+    ],
+    checklist: ["Haltère collé à la poitrine", "Coudes qui passent entre les genoux en bas", "Talons au sol", "Dos droit"],
+  },
+  "front-squat": {
+    why: "Le squat avec la barre devant : le buste reste plus droit et les cuisses travaillent davantage.",
+    findIt: [
+      "Le même rack à squat que le squat classique.",
+      "La barre se pose devant, sur le haut de la poitrine et les épaules.",
+      "Utilise nettement moins de charge qu'au squat classique.",
+    ],
+    simple: [
+      "Place la barre devant toi, posée sur le haut de ta poitrine et tes épaules.",
+      "Croise les bras et lève bien les coudes pour la caler.",
+      "Décolle-la des crochets et recule de deux pas.",
+      "Descends en gardant le buste le plus droit possible.",
+      "Remonte en poussant dans tes talons.",
+    ],
+    checklist: ["Coudes hauts pendant tout le mouvement", "Barre qui ne glisse pas vers l'avant", "Buste droit", "Barres de sécurité réglées"],
+  },
+  "walking-lunge": {
+    why: "Travaille chaque jambe séparément et corrige les différences entre la gauche et la droite.",
+    findIt: [
+      "Un couloir libre dans la salle, souvent le long des miroirs.",
+      "Deux haltères légers, un dans chaque main.",
+      "Aucune machine.",
+    ],
+    simple: [
+      "Debout, un haltère dans chaque main, bras le long du corps.",
+      "Fais un grand pas en avant et plie les deux genoux.",
+      "Le genou arrière descend presque jusqu'au sol.",
+      "Pousse sur la jambe avant pour te relever et enchaîne un pas avec l'autre jambe.",
+      "Avance ainsi sur toute la longueur prévue.",
+    ],
+    checklist: ["Buste droit, pas penché en avant", "Genou avant qui reste au-dessus du pied", "Pas assez grands", "Mouvement lent et stable"],
+  },
+  "good-morning": {
+    why: "Muscle l'arrière des cuisses et le bas du dos. Le buste bascule en avant, les jambes restent presque tendues.",
+    findIt: [
+      "Le rack à squat, avec la barre posée sur le haut du dos comme au squat.",
+      "Commence avec la barre seule, voire un simple bâton : la technique passe avant la charge.",
+    ],
+    simple: [
+      "Barre posée sur le haut du dos, pieds écartés comme tes épaules.",
+      "Plie très légèrement les genoux et garde-les figés.",
+      "Pousse tes fesses en arrière et penche ton buste vers l'avant.",
+      "Descends jusqu'à sentir l'arrière de tes cuisses tirer.",
+      "Reviens en poussant tes hanches vers l'avant.",
+    ],
+    checklist: ["Dos parfaitement droit, jamais arrondi", "Genoux figés", "Descente jusqu'à l'étirement, pas plus", "Charge très légère au début"],
+  },
+  "back-extension": {
+    why: "Renforce le bas du dos et les fessiers. C'est ce qui protège ton dos sur tous les autres exercices.",
+    findIt: [
+      "Un banc incliné à 45 degrés avec deux coussins pour les cuisses et deux rouleaux pour les chevilles.",
+      "On l'appelle banc à lombaires ou chaise romaine.",
+      "Se fait au poids du corps, bras croisés sur la poitrine.",
+    ],
+    simple: [
+      "Installe-toi le ventre sur les coussins, chevilles bloquées sous les rouleaux.",
+      "Croise les bras sur ta poitrine.",
+      "Descends le buste vers le sol en pliant à la hanche.",
+      "Remonte jusqu'à ce que ton corps forme une ligne droite.",
+      "Ne monte pas plus haut : inutile de cambrer.",
+    ],
+    checklist: ["Coussins réglés au niveau des hanches", "Dos droit pendant tout le mouvement", "Arrêt à l'alignement en haut", "Mouvement lent"],
+  },
+  "seated-calf-raise": {
+    why: "Cible la partie basse du mollet, celle que le mollet debout travaille peu.",
+    findIt: [
+      "Une machine où tu es assis avec un coussin qui appuie sur tes genoux.",
+      "Tes pointes de pieds se posent sur un petit marchepied.",
+      "Souvent dans un coin, près des machines à jambes.",
+    ],
+    simple: [
+      "Assieds-toi et pose la pointe des pieds sur le marchepied.",
+      "Cale le coussin sur le bas de tes cuisses, juste au-dessus des genoux.",
+      "Laisse tes talons descendre le plus bas possible.",
+      "Pousse sur tes pointes pour monter tes talons le plus haut possible.",
+      "Redescends lentement.",
+    ],
+    checklist: ["Coussin bien calé sur les cuisses", "Talons qui descendent complètement", "Montée jusqu'en haut", "Mouvement lent, pas de rebond"],
+  },
+  "hanging-leg-raise": {
+    why: "Le meilleur exercice pour les abdominaux du bas, et ça muscle la poigne en prime.",
+    findIt: [
+      "La même barre de traction que pour les tractions.",
+      "Ou une station avec deux accoudoirs et un dossier, où tu prends appui sur les avant-bras.",
+    ],
+    simple: [
+      "Attrape la barre et laisse-toi pendre, bras tendus.",
+      "Monte tes genoux vers ta poitrine en enroulant le bas du dos.",
+      "Redescends lentement jusqu'aux jambes tendues.",
+      "Si c'est trop dur, monte les genoux moins haut.",
+    ],
+    checklist: ["Aucun balancement", "Mouvement qui vient du ventre", "Descente lente", "Lâche la barre avant de perdre le contrôle"],
+  },
+  plank: {
+    why: "Apprend à ton ventre à tenir le tronc rigide. C'est la base qui protège ton dos partout ailleurs.",
+    findIt: [
+      "N'importe quel tapis au sol, dans la zone d'étirements.",
+      "Aucun matériel, aucun réglage.",
+    ],
+    simple: [
+      "Pose tes avant-bras au sol, coudes juste sous tes épaules.",
+      "Tends les jambes en arrière, en appui sur les pointes de pieds.",
+      "Ton corps forme une ligne droite des épaules aux talons.",
+      "Serre le ventre et les fesses, et tiens la position.",
+    ],
+    checklist: ["Fesses ni trop hautes ni trop basses", "Ventre serré", "Respiration continue", "Arrête dès que le dos creuse"],
+  },
 };
 
 const FALLBACK: Coaching = {

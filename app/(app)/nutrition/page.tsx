@@ -39,7 +39,10 @@ export default function NutritionPage() {
 
   return (
     <Page>
-      <TopBar title="Ce que je mange" subtitle={`Objectif : ${targets.kcal} kcal et au moins ${targets.prot} g de protéines`} />
+      <TopBar
+        title="Ce que je mange"
+        subtitle={`${targets.kcal} kcal par jour · ${targets.prot} g de protéines au minimum`}
+      />
 
       {/* Compteur du jour */}
       <Card className="mb-4 p-5">

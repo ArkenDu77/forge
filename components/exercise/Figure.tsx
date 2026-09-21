@@ -18,6 +18,7 @@ const r2 = (n: number) => Math.round(n * 100) / 100;
 /** Épaisseurs des segments : première valeur côté racine, seconde côté extrémité. */
 const W = {
   torso1: 17, torso2: 21,
+  torsoFront1: 22, torsoFront2: 34,
   neck1: 9.5, neck2: 7.5,
   upper1: 11, upper2: 8.5,
   fore1: 8.5, fore2: 6,
@@ -104,15 +105,13 @@ export function ExerciseFigure({
       limb("fore", sk.near.elbow, sk.near.wrist, W.fore1, W.fore2);
       set("head", { cx: r2(sk.head[0]), cy: r2(sk.head[1]) });
       set("glow", { cx: r2(sk.hip[0]) });
-      if (sk.view === "front") {
-        set("torso", {
-          d: `M${r2(sk.shoulderL[0])},${r2(sk.shoulderL[1])} L${r2(sk.shoulderR[0])},${r2(sk.shoulderR[1])} L${r2(
-            sk.hipR[0]
-          )},${r2(sk.hipR[1])} L${r2(sk.hipL[0])},${r2(sk.hipL[1])} Z`,
-        });
-      } else {
-        limb("torso", sk.hip, sk.shoulder, W.torso1, W.torso2);
-      }
+      limb(
+        "torso",
+        sk.hip,
+        sk.shoulder,
+        sk.view === "front" ? W.torsoFront1 : W.torso1,
+        sk.view === "front" ? W.torsoFront2 : W.torso2
+      );
       const w = sk.near.wrist;
       const wl = sk.far.wrist;
       set("load-near", { transform: `translate(${r2(w[0])} ${r2(w[1])})` });
@@ -161,15 +160,19 @@ export function ExerciseFigure({
   const g = `url(#bd-${uid})`;
 
   const INK = "rgba(9,11,16,.93)";
+  const isFront = media.view === "front";
+  const farStroke = isFront ? c1 : c2;
   const bone = ({
-    k, a, b, w1, w2, opacity = 1, stroke = c1,
-  }: { k: string; a: P; b: P; w1: number; w2: number; opacity?: number; stroke?: string }) => (
+    k, a, b, w1, w2, opacity = 1, stroke = c1, far = false,
+  }: { k: string; a: P; b: P; w1: number; w2: number; opacity?: number; stroke?: string; far?: boolean }) => (
     <path
       key={k}
       ref={reg(k)}
       d={capsule(a, b, w1, w2)}
-      fill={INK}
-      stroke={stroke}
+      // Le côté opposé est un aplat sourd : il donne la profondeur sans ajouter
+      // de contour qui viendrait brouiller la lecture du membre principal.
+      fill={far ? stroke : INK}
+      stroke={far ? "none" : stroke}
       strokeWidth="2.1"
       strokeLinejoin="round"
       opacity={opacity}
@@ -210,30 +213,29 @@ export function ExerciseFigure({
         )}
 
         <g>
-          <g opacity="0.28">
-            {bone({ k: "far-upper", a: initial.shoulderL, b: initial.far.elbow, w1: W.upper1, w2: W.upper2, stroke: c2 })}
-            {bone({ k: "far-fore", a: initial.far.elbow, b: initial.far.wrist, w1: W.fore1, w2: W.fore2, stroke: c2 })}
-            {bone({ k: "far-thigh", a: initial.hipL, b: initial.far.knee, w1: W.thigh1, w2: W.thigh2, stroke: c2 })}
-            {bone({ k: "far-shin", a: initial.far.knee, b: initial.far.ankle, w1: W.shin1, w2: W.shin2, stroke: c2 })}
-            {bone({ k: "far-foot", a: initial.far.ankle, b: initial.far.toe, w1: W.foot1, w2: W.foot2, stroke: c2 })}
+          {/* De profil, le côté opposé est un aplat sourd qui donne la profondeur.
+              De face, les deux côtés sont symétriques : les estomper ferait croire
+              à un corps de travers. */}
+          <g opacity={isFront ? 1 : 0.16}>
+            {bone({ k: "far-upper", a: initial.shoulderL, b: initial.far.elbow, w1: W.upper1, w2: W.upper2, stroke: farStroke, far: !isFront })}
+            {bone({ k: "far-fore", a: initial.far.elbow, b: initial.far.wrist, w1: W.fore1, w2: W.fore2, stroke: farStroke, far: !isFront })}
+            {bone({ k: "far-thigh", a: initial.hipL, b: initial.far.knee, w1: W.thigh1, w2: W.thigh2, stroke: farStroke, far: !isFront })}
+            {bone({ k: "far-shin", a: initial.far.knee, b: initial.far.ankle, w1: W.shin1, w2: W.shin2, stroke: farStroke, far: !isFront })}
+            {bone({ k: "far-foot", a: initial.far.ankle, b: initial.far.toe, w1: W.foot1, w2: W.foot2, stroke: farStroke, far: !isFront })}
           </g>
 
-          {media.view === "front" ? (
-            <path
-              ref={reg("torso")}
-              d={`M${r2(initial.shoulderL[0])},${r2(initial.shoulderL[1])} L${r2(initial.shoulderR[0])},${r2(
-                initial.shoulderR[1]
-              )} L${r2(initial.hipR[0])},${r2(initial.hipR[1])} L${r2(initial.hipL[0])},${r2(initial.hipL[1])} Z`}
-              fill="rgba(9,11,16,.93)"
-              stroke={c1}
-              strokeWidth="2.1"
-              strokeLinejoin="round"
-            />
-          ) : (
-            bone({ k: "torso", a: initial.hip, b: initial.shoulder, w1: W.torso1, w2: W.torso2 })
-          )}
-
+          {/* Le cou passe DERRIÈRE le tronc : dessiné par-dessus, il formait un
+              médaillon en plein milieu de la poitrine. */}
           {bone({ k: "neck", a: initial.shoulder, b: initial.neck, w1: W.neck1, w2: W.neck2 })}
+
+          {bone({
+            k: "torso",
+            a: initial.hip,
+            b: initial.shoulder,
+            w1: isFront ? W.torsoFront1 : W.torso1,
+            w2: isFront ? W.torsoFront2 : W.torso2,
+          })}
+
           <circle ref={reg("head")} cx={r2(initial.head[0])} cy={r2(initial.head[1])} r="8.6" fill="rgba(9,11,16,.93)" stroke={c1} strokeWidth="2.1" />
 
           {bone({ k: "thigh", a: initial.hipR, b: initial.near.knee, w1: W.thigh1, w2: W.thigh2 })}
