@@ -88,9 +88,12 @@ export const PULL_EXERCISES: Exercise[] = [
       tempoMs: 1600,
       captions: ["Bras tendus", "Menton au-dessus"],
       viewBox: "0 0 200 180",
+      // Ce qui distingue la machine d'une traction libre : la pile de poids sur
+      // le côté, et le coussin sur lequel on pose les genoux.
       props: [
         { kind: "pullup-bar", x: 100, y: 10, w: 78 },
-        { kind: "platform", x: 100, y: 150, w: 52, h: 9 },
+        { kind: "machine", x: 26, y: 40, w: 22, h: 104 },
+        { kind: "platform", x: 104, y: 120, w: 58, h: 11 },
       ],
       load: { kind: "bodyweight" },
       poses: [
@@ -177,11 +180,14 @@ export const PULL_EXERCISES: Exercise[] = [
       view: "side",
       tempoMs: 1600,
       captions: ["Bras tendus", "Coudes en arrière"],
-      props: [{ kind: "floor" }, { kind: "bench", x: 96, y: 96, w: 70, incline: -40 }],
+      // Tout l'exercice tient dans un détail : la poitrine repose sur un banc
+      // incliné. Le buste suit donc la pente du banc et les bras pendent
+      // librement devant, dans le vide.
+      props: [{ kind: "floor" }, { kind: "bench", x: 106, y: 110, w: 96, incline: 42 }],
       load: { kind: "dumbbell" },
       poses: [
-        reclined({ hip: [96, 84], torso: -52, upperArm: 92, foreArm: 90, thigh: 96, shin: 88 }),
-        reclined({ hip: [96, 84], torso: -52, upperArm: 138, foreArm: 66, thigh: 96, shin: 88 }),
+        ikPose({ hip: [72, 100], torso: -42, ankle: [64, 132], kneeBend: 1, wrist: [108, 118], elbowBend: 1 }),
+        ikPose({ hip: [72, 100], torso: -42, ankle: [64, 132], kneeBend: 1, wrist: [102, 90], elbowBend: -1 }),
       ],
     },
   },

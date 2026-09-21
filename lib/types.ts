@@ -42,7 +42,8 @@ export type PropSpec =
   | { kind: "seat"; x: number; y: number; back?: number }
   | { kind: "machine"; x: number; y: number; w?: number; h?: number; label?: string }
   | { kind: "pulley"; x: number; y: number }
-  | { kind: "platform"; x: number; y: number; w?: number; h?: number }
+  /** `angle` : inclinaison en degrés, pour un plan de poussée. */
+  | { kind: "platform"; x: number; y: number; w?: number; h?: number; angle?: number }
   | { kind: "step"; x: number; y: number }
   /** `front` : dessiné par-dessus la silhouette, pour un objet tenu contre soi. */
   | { kind: "bag"; x: number; y: number; r?: number; front?: boolean };

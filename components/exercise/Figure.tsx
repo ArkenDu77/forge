@@ -325,7 +325,11 @@ function PropShape({ spec }: { spec: PropSpec }) {
         </g>
       );
     case "platform":
-      return <rect x={spec.x - (spec.w ?? 40) / 2} y={spec.y} width={spec.w ?? 40} height={spec.h ?? 8} rx="4" fill={steelSoft} />;
+      return (
+        <g transform={spec.angle ? `rotate(${spec.angle} ${spec.x} ${spec.y})` : undefined}>
+          <rect x={spec.x - (spec.w ?? 40) / 2} y={spec.y} width={spec.w ?? 40} height={spec.h ?? 8} rx="4" fill={steelSoft} />
+        </g>
+      );
     case "bag":
       return (
         <g>

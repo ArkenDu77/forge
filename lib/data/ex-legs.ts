@@ -218,11 +218,16 @@ export const LEG_EXERCISES: Exercise[] = [
       view: "side",
       tempoMs: 1700,
       captions: ["Jambes tendues", "Genoux fléchis"],
-      props: [{ kind: "seat", x: 62, y: 104, back: 1 }, { kind: "platform", x: 150, y: 62, w: 40, h: 12 }],
+      // Les pieds poussent sur un plan incliné. Avant, ce plan était un petit
+      // rectangle posé loin devant, que les pieds ne touchaient jamais.
+      props: [
+        { kind: "seat", x: 58, y: 104, back: 1 },
+        { kind: "platform", x: 130, y: 76, w: 66, h: 11, angle: -52 },
+      ],
       load: { kind: "machine-handle" },
       poses: [
-        { hip: [70, 96], torso: -150, upperArm: 30, foreArm: 40, thigh: -32, shin: -22, foot: -80 },
-        { hip: [70, 96], torso: -150, upperArm: 30, foreArm: 40, thigh: -66, shin: 6, foot: -66 },
+        ikPose({ hip: [90, 98], torso: -158, ankle: [142, 60], kneeBend: -1, upperArm: 26, foreArm: 34, foot: -60 }),
+        ikPose({ hip: [90, 98], torso: -158, ankle: [116, 90], kneeBend: -1, upperArm: 26, foreArm: 34, foot: -60 }),
       ],
     },
   },

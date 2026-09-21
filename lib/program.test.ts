@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { adaptationLabel, adaptForWeek, ADAPTATION_WEEKS, ALL_DAYS, getDay } from "@/lib/data/program";
-import { ex } from "@/lib/data/exercises";
+import { EXERCISES, ex } from "@/lib/data/exercises";
 import { hasCoaching } from "@/lib/data/coaching";
+import { PLATE_FRAMES } from "@/lib/data/plates";
+import { existsSync, readFileSync } from "node:fs";
 
 /**
  * Le programme est une donnée, pas du code : rien ne l'empêche de dériver
@@ -98,6 +100,66 @@ describe("contenu pédagogique", () => {
     for (const x of carries) {
       if (x.metric === "distance") expect(x.distMin && x.distMax).toBeTruthy();
       if (x.metric === "duration") expect(x.secMin && x.secMax).toBeTruthy();
+    }
+  });
+});
+
+/* ---------------- Illustrations ---------------- */
+
+describe("illustrations", () => {
+  const ledger = JSON.parse(readFileSync("public/exercise-media-sources.json", "utf8")) as {
+    assets: { exerciseId: string; commonsFiles: string[]; license: string; attributionRequired: boolean }[];
+    customDrawn: { exercises: Record<string, string> };
+  };
+
+  it("chaque exercice est illustré, par une planche ou par le moteur maison", () => {
+    for (const e of EXERCISES) {
+      const plate = PLATE_FRAMES[e.id];
+      if (plate) continue;
+      // Sans planche, la silhouette doit avoir de quoi être dessinée.
+      expect(e.media.poses.length, e.id).toBeGreaterThan(0);
+    }
+  });
+
+  it("la table des planches correspond aux fichiers du registre", () => {
+    const fromLedger = Object.fromEntries(ledger.assets.map((a) => [a.exerciseId, a.commonsFiles.length]));
+    expect(PLATE_FRAMES).toEqual(fromLedger);
+  });
+
+  it("toute planche est sous licence libre et créditée", () => {
+    for (const a of ledger.assets) {
+      expect(a.license, a.exerciseId).toMatch(/^CC BY/);
+      expect(a.attributionRequired, a.exerciseId).toBe(true);
+    }
+  });
+
+  it("les fichiers annoncés par le registre existent", () => {
+    for (const id of Object.keys(PLATE_FRAMES)) {
+      for (let f = 1; f <= PLATE_FRAMES[id]; f++) {
+        expect(existsSync(`public/exercises/${id}-${f}.svg`), `${id}-${f}.svg`).toBe(true);
+      }
+    }
+  });
+
+  it("deux exercices ne partagent une planche que si c'est voulu", () => {
+    // La traction et sa version négative se font sur la même barre, avec le
+    // même mouvement : c'est le seul partage accepté. Tout autre doublon est
+    // une faute de frappe dans la table de correspondance.
+    const PARTAGES_VOULUS = [["negative-pull-up", "pull-up"]];
+    const byFiles = new Map<string, string[]>();
+    for (const a of ledger.assets) {
+      const key = a.commonsFiles.join(" + ");
+      byFiles.set(key, [...(byFiles.get(key) ?? []), a.exerciseId]);
+    }
+    const partages = [...byFiles.values()].filter((ids) => ids.length > 1).map((ids) => ids.sort());
+    expect(partages).toEqual(PARTAGES_VOULUS);
+  });
+
+  it("chaque exercice dessiné à la main dit pourquoi il n'a pas de planche", () => {
+    const maison = EXERCISES.filter((e) => !PLATE_FRAMES[e.id]).map((e) => e.id).sort();
+    expect(Object.keys(ledger.customDrawn.exercises).sort()).toEqual(maison);
+    for (const [id, raison] of Object.entries(ledger.customDrawn.exercises)) {
+      expect(raison.length, id).toBeGreaterThan(15);
     }
   });
 });

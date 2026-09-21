@@ -277,11 +277,14 @@ export const EXTRA_EXERCISES: Exercise[] = [
       view: "front",
       tempoMs: 1500,
       captions: ["Bras devant", "Bras écartés"],
-      props: [{ kind: "floor" }, { kind: "seat", x: 100, y: 102, back: 0 }],
+      // Vu de face, des cuisses à l'horizontale partent sur les côtés et la
+      // personne a l'air de faire le grand écart. Assis, on dessine les jambes
+      // qui descendent vers le sol, genoux écartés : le siège dit le reste.
+      props: [{ kind: "floor" }, { kind: "seat", x: 100, y: 88, back: 0 }],
       load: { kind: "machine-handle" },
       poses: [
-        seated({ hip: [100, 102], torso: -92, upperArm: 150, foreArm: 172, thigh: 2, shin: 88 }),
-        seated({ hip: [100, 102], torso: -92, upperArm: 4, foreArm: 0, thigh: 2, shin: 88 }),
+        seated({ hip: [100, 78], torso: -92, upperArm: 150, foreArm: 172, thigh: 58, shin: 112 }),
+        seated({ hip: [100, 78], torso: -92, upperArm: 4, foreArm: 0, thigh: 58, shin: 112 }),
       ],
     },
   },

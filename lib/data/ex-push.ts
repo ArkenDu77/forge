@@ -430,11 +430,15 @@ export const PUSH_EXERCISES: Exercise[] = [
       view: "side",
       tempoMs: 1500,
       captions: ["Barre aux épaules", "Bras tendus"],
+      // Bras au-dessus de la tête : le cadre remonte au-dessus du sol. Avec le
+      // cadre par défaut, la barre était calculée hors champ et n'apparaissait
+      // nulle part — l'exercice n'avait tout simplement pas de barre.
+      viewBox: "0 -44 200 194",
       props: [{ kind: "floor" }],
       load: { kind: "barbell" },
       poses: [
-        stand({ upperArm: -52, foreArm: -104 }),
-        stand({ upperArm: -86, foreArm: -92 }),
+        ikPose({ hip: [100, 72], torso: -90, ankle: [100, 132], wrist: [88, 36], elbowBend: 1 }),
+        ikPose({ hip: [100, 72], torso: -90, ankle: [100, 132], wrist: [99, -16], elbowBend: 1 }),
       ],
     },
   },
