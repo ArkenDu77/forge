@@ -297,7 +297,6 @@ export const EXTRA_EXERCISES: Exercise[] = [
     increment: 5,
     technical: 1,
     startFactor: 0.14,
-    plates: 2,
     setup: [
       "C'est le siège avec un pupitre incliné devant : tu poses les bras dessus.",
       "Assieds-toi, cale tes aisselles en haut du pupitre.",
@@ -345,7 +344,6 @@ export const EXTRA_EXERCISES: Exercise[] = [
     increment: 0,
     technical: 2,
     startFactor: 0,
-    plates: 2,
     setup: [
       "Place un banc ou une marche sous la barre de traction.",
       "Monte dessus et attrape la barre, menton déjà au-dessus.",

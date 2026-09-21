@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import type { Exercise } from "@/lib/types";
 import { ExerciseFigure, type Accent } from "./Figure";
 import { cx } from "@/components/ui/primitives";
+import { plateFrames } from "@/lib/data/plates";
 
 /**
  * Point d'entrée unique pour l'illustration d'un exercice.
@@ -39,7 +40,8 @@ export function ExerciseMedia({
   showTrail?: boolean;
   priority?: boolean;
 }) {
-  if (!exercise.plates) {
+  const frames = plateFrames(exercise.id);
+  if (!frames) {
     return (
       <ExerciseFigure
         media={exercise.media}
@@ -54,7 +56,7 @@ export function ExerciseMedia({
   return (
     <ExercisePlate
       id={exercise.id}
-      frames={exercise.plates}
+      frames={frames}
       accent={accent}
       playing={playing}
       frame={frame}
@@ -144,7 +146,7 @@ function ExercisePlate({
 
 /** Mention de licence, obligatoire partout où une planche est affichée. */
 export function PlateCredit({ exercise, className }: { exercise: Exercise; className?: string }) {
-  if (!exercise.plates) return null;
+  if (!plateFrames(exercise.id)) return null;
   return (
     <span className={cx("text-[9.5px] leading-none text-chalk-mute/70", className)}>
       Illustration Everkinetic · CC BY-SA 3.0

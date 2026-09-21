@@ -135,7 +135,6 @@ export const LEG_EXERCISES: Exercise[] = [
   },
   {
     id: "hack-squat",
-    plates: 1,
     name: "Hack squat",
     slug: "hack-squat",
     pattern: "squat",
@@ -309,7 +308,6 @@ export const LEG_EXERCISES: Exercise[] = [
   },
   {
     id: "rdl",
-    plates: 2,
     name: "Romanian Deadlift",
     shortName: "RDL",
     slug: "romanian-deadlift",
@@ -470,7 +468,6 @@ export const LEG_EXERCISES: Exercise[] = [
   },
   {
     id: "leg-curl",
-    plates: 2,
     name: "Leg curl",
     slug: "leg-curl",
     pattern: "isolation",
@@ -513,7 +510,6 @@ export const LEG_EXERCISES: Exercise[] = [
   },
   {
     id: "leg-extension",
-    plates: 2,
     name: "Leg extension",
     slug: "leg-extension",
     pattern: "isolation",
@@ -548,7 +544,6 @@ export const LEG_EXERCISES: Exercise[] = [
   },
   {
     id: "standing-calf-raise",
-    plates: 2,
     name: "Mollets debout",
     shortName: "Mollets",
     slug: "mollets-debout",
@@ -620,7 +615,6 @@ export const LEG_EXERCISES: Exercise[] = [
   },
   {
     id: "weighted-crunch",
-    plates: 2,
     name: "Abdominaux lestés (crunch poulie)",
     shortName: "Abdos lestés",
     slug: "abdominaux-lestes",

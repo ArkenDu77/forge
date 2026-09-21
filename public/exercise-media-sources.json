@@ -8,24 +8,37 @@
     "La recoloration est faite à l'affichage : les fichiers distribués ne sont pas modifiés."
   ],
   "customDrawn": {
-    "reason": "Absents du catalogue Commons — dessinés par le moteur maison, aucune licence tierce. Tout exercice de la librairie qui n'apparaît pas dans « assets » est dans le même cas : sa démonstration est générée par le moteur d'animation du projet, à partir de données de pose, et n'emprunte aucun média extérieur.",
-    "exercises": [
-      "chest-supported-row",
-      "lateral-raise",
-      "leg-press",
-      "farmer-carry",
-      "dead-hang",
-      "reverse-pec-deck",
-      "trap-bar-deadlift",
-      "bulgarian-split-squat",
-      "hip-thrust",
-      "sandbag-carry"
-    ]
+    "reason": "Dessinés par le moteur d'animation du projet à partir de données de pose : aucun média extérieur, aucune licence tierce. Une planche du catalogue n'est retenue que si elle montre le matériel que la fiche de l'exercice dit d'aller chercher ; sinon l'exercice est dessiné ici, avec sa raison.",
+    "exercises": {
+      "assisted-pull-up": "La seule planche de traction du catalogue montre une barre fixe ; la fiche envoie chercher une machine à assistance avec repose-genoux.",
+      "overhead-press": "Le catalogue n'a que le développé militaire assis ; la consigne est debout.",
+      "converging-chest-press": "Pas de planche distincte du développé machine déjà utilisé pour un autre exercice.",
+      "cable-lateral-raise": "Absent du catalogue.",
+      "cable-curl": "Absent du catalogue.",
+      "face-pull": "Absent du catalogue.",
+      "machine-row": "Absent du catalogue ; la seule planche de rowing assis sert déjà au rowing à la poulie.",
+      "chest-supported-row": "Absent du catalogue : aucune planche ne montre la poitrine appuyée sur un banc incliné.",
+      "reverse-pec-deck": "Absent du catalogue : les planches d'arrière d'épaule montrent haltères ou poulie, pas la machine.",
+      "leg-press": "Absent du catalogue.",
+      "goblet-squat": "Absent du catalogue.",
+      "bulgarian-split-squat": "Absent du catalogue : les fentes du catalogue ont le pied arrière au sol, pas surélevé.",
+      "hip-thrust": "Absent du catalogue : le pont fessier du catalogue se fait au sol, sans banc sous les épaules.",
+      "trap-bar-deadlift": "Absent du catalogue.",
+      "farmer-carry": "Absent du catalogue.",
+      "sandbag-carry": "Absent du catalogue.",
+      "dead-hang": "Absent du catalogue : un maintien statique n'a pas de seconde position, la silhouette maison suffit.",
+      "hanging-leg-raise": "Absent du catalogue.",
+      "plank": "Absent du catalogue : seule la version latérale existe."
+    }
   },
   "assets": [
     {
       "exerciseId": "bench-press",
-      "commonsBase": "Bench press",
+      "commonsFiles": [
+        "Bench press 1.svg",
+        "Bench press 2.svg"
+      ],
+      "recomposedPair": false,
       "author": "Everkinetic",
       "license": "CC BY-SA 3.0",
       "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
@@ -49,33 +62,12 @@
       "notes": "Planches recolorées à l'affichage (filtre CSS). Les fichiers stockés sont inchangés."
     },
     {
-      "exerciseId": "assisted-pull-up",
-      "commonsBase": "Pull ups",
-      "author": "Everkinetic",
-      "license": "CC BY-SA 3.0",
-      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
-      "attributionRequired": true,
-      "attribution": "Everkinetic — CC BY-SA 3.0",
-      "credit": "http://db.everkinetic.com/",
-      "frames": [
-        {
-          "frame": 1,
-          "assetPath": "/exercises/assisted-pull-up-1.svg",
-          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Pull_ups_1.svg",
-          "bytes": 14576
-        },
-        {
-          "frame": 2,
-          "assetPath": "/exercises/assisted-pull-up-2.svg",
-          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Pull_ups_2.svg",
-          "bytes": 14572
-        }
+      "exerciseId": "db-bench-press",
+      "commonsFiles": [
+        "Bench press dumbbell 1.svg",
+        "Bench press dumbbell 2.svg"
       ],
-      "notes": "Planches recolorées à l'affichage (filtre CSS). Les fichiers stockés sont inchangés."
-    },
-    {
-      "exerciseId": "negative-pull-up",
-      "commonsBase": "Pull ups",
+      "recomposedPair": false,
       "author": "Everkinetic",
       "license": "CC BY-SA 3.0",
       "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
@@ -85,22 +77,26 @@
       "frames": [
         {
           "frame": 1,
-          "assetPath": "/exercises/negative-pull-up-1.svg",
-          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Pull_ups_1.svg",
-          "bytes": 14576
+          "assetPath": "/exercises/db-bench-press-1.svg",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Bench_press_dumbbell_1.svg",
+          "bytes": 19098
         },
         {
           "frame": 2,
-          "assetPath": "/exercises/negative-pull-up-2.svg",
-          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Pull_ups_2.svg",
-          "bytes": 14572
+          "assetPath": "/exercises/db-bench-press-2.svg",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Bench_press_dumbbell_2.svg",
+          "bytes": 18608
         }
       ],
       "notes": "Planches recolorées à l'affichage (filtre CSS). Les fichiers stockés sont inchangés."
     },
     {
       "exerciseId": "incline-db-press",
-      "commonsBase": "Dumbbell incline bench press",
+      "commonsFiles": [
+        "Dumbbell incline bench press 1.svg",
+        "Dumbbell incline bench press 2.svg"
+      ],
+      "recomposedPair": false,
       "author": "Everkinetic",
       "license": "CC BY-SA 3.0",
       "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
@@ -124,177 +120,12 @@
       "notes": "Planches recolorées à l'affichage (filtre CSS). Les fichiers stockés sont inchangés."
     },
     {
-      "exerciseId": "db-shoulder-press",
-      "commonsBase": "Dumbbell shoulder press",
-      "author": "Everkinetic",
-      "license": "CC BY-SA 3.0",
-      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
-      "attributionRequired": true,
-      "attribution": "Everkinetic — CC BY-SA 3.0",
-      "credit": "http://db.everkinetic.com/",
-      "frames": [
-        {
-          "frame": 1,
-          "assetPath": "/exercises/db-shoulder-press-1.svg",
-          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Dumbbell_shoulder_press_1.svg",
-          "bytes": 17131
-        },
-        {
-          "frame": 2,
-          "assetPath": "/exercises/db-shoulder-press-2.svg",
-          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Dumbbell_shoulder_press_2.svg",
-          "bytes": 17111
-        }
-      ],
-      "notes": "Planches recolorées à l'affichage (filtre CSS). Les fichiers stockés sont inchangés."
-    },
-    {
-      "exerciseId": "overhead-triceps-extension",
-      "commonsBase": "Standing overhead triceps extension with barbell",
-      "author": "Everkinetic",
-      "license": "CC BY-SA 3.0",
-      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
-      "attributionRequired": true,
-      "attribution": "Everkinetic — CC BY-SA 3.0",
-      "credit": "http://db.everkinetic.com/",
-      "frames": [
-        {
-          "frame": 1,
-          "assetPath": "/exercises/overhead-triceps-extension-1.svg",
-          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Standing_overhead_triceps_extension_with_barbell_1.svg",
-          "bytes": 13639
-        },
-        {
-          "frame": 2,
-          "assetPath": "/exercises/overhead-triceps-extension-2.svg",
-          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Standing_overhead_triceps_extension_with_barbell_2.svg",
-          "bytes": 11947
-        }
-      ],
-      "notes": "Planches recolorées à l'affichage (filtre CSS). Les fichiers stockés sont inchangés."
-    },
-    {
-      "exerciseId": "incline-curl",
-      "commonsBase": "Alternating incline curl with dumbbell",
-      "author": "Everkinetic",
-      "license": "CC BY-SA 3.0",
-      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
-      "attributionRequired": true,
-      "attribution": "Everkinetic — CC BY-SA 3.0",
-      "credit": "http://db.everkinetic.com/",
-      "frames": [
-        {
-          "frame": 1,
-          "assetPath": "/exercises/incline-curl-1.svg",
-          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Alternating_incline_curl_with_dumbbell_1.svg",
-          "bytes": 13735
-        },
-        {
-          "frame": 2,
-          "assetPath": "/exercises/incline-curl-2.svg",
-          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Alternating_incline_curl_with_dumbbell_2.svg",
-          "bytes": 11504
-        }
-      ],
-      "notes": "Planches recolorées à l'affichage (filtre CSS). Les fichiers stockés sont inchangés."
-    },
-    {
-      "exerciseId": "hack-squat",
-      "commonsBase": "Hack squat machine",
-      "author": "Everkinetic",
-      "license": "CC BY-SA 3.0",
-      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
-      "attributionRequired": true,
-      "attribution": "Everkinetic — CC BY-SA 3.0",
-      "credit": "http://db.everkinetic.com/",
-      "frames": [
-        {
-          "frame": 1,
-          "assetPath": "/exercises/hack-squat-1.svg",
-          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Hack_squat_machine_1.svg",
-          "bytes": 14253
-        }
-      ],
-      "notes": "Planches recolorées à l'affichage (filtre CSS). Les fichiers stockés sont inchangés."
-    },
-    {
-      "exerciseId": "rdl",
-      "commonsBase": "Romanian dead lift",
-      "author": "Everkinetic",
-      "license": "CC BY-SA 3.0",
-      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
-      "attributionRequired": true,
-      "attribution": "Everkinetic — CC BY-SA 3.0",
-      "credit": "http://db.everkinetic.com/",
-      "frames": [
-        {
-          "frame": 1,
-          "assetPath": "/exercises/rdl-1.svg",
-          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Romanian_dead_lift_1.svg",
-          "bytes": 13337
-        },
-        {
-          "frame": 2,
-          "assetPath": "/exercises/rdl-2.svg",
-          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Romanian_dead_lift_2.svg",
-          "bytes": 13314
-        }
-      ],
-      "notes": "Planches recolorées à l'affichage (filtre CSS). Les fichiers stockés sont inchangés."
-    },
-    {
-      "exerciseId": "leg-curl",
-      "commonsBase": "Lying leg curl machine",
-      "author": "Everkinetic",
-      "license": "CC BY-SA 3.0",
-      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
-      "attributionRequired": true,
-      "attribution": "Everkinetic — CC BY-SA 3.0",
-      "credit": "http://db.everkinetic.com/",
-      "frames": [
-        {
-          "frame": 1,
-          "assetPath": "/exercises/leg-curl-1.svg",
-          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Lying_leg_curl_machine_1.svg",
-          "bytes": 12661
-        },
-        {
-          "frame": 2,
-          "assetPath": "/exercises/leg-curl-2.svg",
-          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Lying_leg_curl_machine_2.svg",
-          "bytes": 12513
-        }
-      ],
-      "notes": "Planches recolorées à l'affichage (filtre CSS). Les fichiers stockés sont inchangés."
-    },
-    {
-      "exerciseId": "standing-calf-raise",
-      "commonsBase": "Standing calf raises using machine",
-      "author": "Everkinetic",
-      "license": "CC BY-SA 3.0",
-      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
-      "attributionRequired": true,
-      "attribution": "Everkinetic — CC BY-SA 3.0",
-      "credit": "http://db.everkinetic.com/",
-      "frames": [
-        {
-          "frame": 1,
-          "assetPath": "/exercises/standing-calf-raise-1.svg",
-          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Standing_calf_raises_using_machine_1.svg",
-          "bytes": 10457
-        },
-        {
-          "frame": 2,
-          "assetPath": "/exercises/standing-calf-raise-2.svg",
-          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Standing_calf_raises_using_machine_2.svg",
-          "bytes": 11311
-        }
-      ],
-      "notes": "Planches recolorées à l'affichage (filtre CSS). Les fichiers stockés sont inchangés."
-    },
-    {
       "exerciseId": "incline-barbell-press",
-      "commonsBase": "Incline bench press",
+      "commonsFiles": [
+        "Incline bench press 1.svg",
+        "Incline bench press 2.svg"
+      ],
+      "recomposedPair": false,
       "author": "Everkinetic",
       "license": "CC BY-SA 3.0",
       "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
@@ -318,33 +149,12 @@
       "notes": "Planches recolorées à l'affichage (filtre CSS). Les fichiers stockés sont inchangés."
     },
     {
-      "exerciseId": "lat-pulldown",
-      "commonsBase": "Wide grip lat pull down",
-      "author": "Everkinetic",
-      "license": "CC BY-SA 3.0",
-      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
-      "attributionRequired": true,
-      "attribution": "Everkinetic — CC BY-SA 3.0",
-      "credit": "http://db.everkinetic.com/",
-      "frames": [
-        {
-          "frame": 1,
-          "assetPath": "/exercises/lat-pulldown-1.svg",
-          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Wide_grip_lat_pull_down_1.svg",
-          "bytes": 11643
-        },
-        {
-          "frame": 2,
-          "assetPath": "/exercises/lat-pulldown-2.svg",
-          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Wide_grip_lat_pull_down_2.svg",
-          "bytes": 12755
-        }
-      ],
-      "notes": "Planches recolorées à l'affichage (filtre CSS). Les fichiers stockés sont inchangés."
-    },
-    {
       "exerciseId": "chest-press",
-      "commonsBase": "Machine bench press",
+      "commonsFiles": [
+        "Machine bench press 1.svg",
+        "Machine bench press 2.svg"
+      ],
+      "recomposedPair": false,
       "author": "Everkinetic",
       "license": "CC BY-SA 3.0",
       "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
@@ -368,8 +178,12 @@
       "notes": "Planches recolorées à l'affichage (filtre CSS). Les fichiers stockés sont inchangés."
     },
     {
-      "exerciseId": "seated-cable-row",
-      "commonsBase": "Seated cable rows",
+      "exerciseId": "cable-fly",
+      "commonsFiles": [
+        "Cable crossover 1.svg",
+        "Cable crossover 2.svg"
+      ],
+      "recomposedPair": false,
       "author": "Everkinetic",
       "license": "CC BY-SA 3.0",
       "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
@@ -379,22 +193,26 @@
       "frames": [
         {
           "frame": 1,
-          "assetPath": "/exercises/seated-cable-row-1.svg",
-          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Seated_cable_rows_1.svg",
-          "bytes": 11731
+          "assetPath": "/exercises/cable-fly-1.svg",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Cable_crossover_1.svg",
+          "bytes": 14343
         },
         {
           "frame": 2,
-          "assetPath": "/exercises/seated-cable-row-2.svg",
-          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Seated_cable_rows_2.svg",
-          "bytes": 12817
+          "assetPath": "/exercises/cable-fly-2.svg",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Cable_crossover_2.svg",
+          "bytes": 14001
         }
       ],
       "notes": "Planches recolorées à l'affichage (filtre CSS). Les fichiers stockés sont inchangés."
     },
     {
-      "exerciseId": "preacher-curl",
-      "commonsBase": "Preacher curl with machine",
+      "exerciseId": "dips",
+      "commonsFiles": [
+        "Chest dips 1.svg",
+        "Chest dips 2.svg"
+      ],
+      "recomposedPair": false,
       "author": "Everkinetic",
       "license": "CC BY-SA 3.0",
       "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
@@ -404,22 +222,26 @@
       "frames": [
         {
           "frame": 1,
-          "assetPath": "/exercises/preacher-curl-1.svg",
-          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Preacher_curl_with_machine_1.svg",
-          "bytes": 13274
+          "assetPath": "/exercises/dips-1.svg",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Chest_dips_1.svg",
+          "bytes": 18813
         },
         {
           "frame": 2,
-          "assetPath": "/exercises/preacher-curl-2.svg",
-          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Preacher_curl_with_machine_2.svg",
-          "bytes": 11807
+          "assetPath": "/exercises/dips-2.svg",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Chest_dips_2.svg",
+          "bytes": 16095
         }
       ],
       "notes": "Planches recolorées à l'affichage (filtre CSS). Les fichiers stockés sont inchangés."
     },
     {
-      "exerciseId": "hammer-curl",
-      "commonsBase": "Bicep hammer curl with dumbbell",
+      "exerciseId": "db-shoulder-press",
+      "commonsFiles": [
+        "Dumbbell shoulder press 1.svg",
+        "Dumbbell shoulder press 2.svg"
+      ],
+      "recomposedPair": false,
       "author": "Everkinetic",
       "license": "CC BY-SA 3.0",
       "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
@@ -429,22 +251,113 @@
       "frames": [
         {
           "frame": 1,
-          "assetPath": "/exercises/hammer-curl-1.svg",
-          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Bicep_hammer_curl_with_dumbbell_1.svg",
-          "bytes": 12084
+          "assetPath": "/exercises/db-shoulder-press-1.svg",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Dumbbell_shoulder_press_1.svg",
+          "bytes": 17131
         },
         {
           "frame": 2,
-          "assetPath": "/exercises/hammer-curl-2.svg",
-          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Bicep_hammer_curl_with_dumbbell_2.svg",
-          "bytes": 10304
+          "assetPath": "/exercises/db-shoulder-press-2.svg",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Dumbbell_shoulder_press_2.svg",
+          "bytes": 17111
+        }
+      ],
+      "notes": "Planches recolorées à l'affichage (filtre CSS). Les fichiers stockés sont inchangés."
+    },
+    {
+      "exerciseId": "shoulder-press-machine",
+      "commonsFiles": [
+        "Seated shoulder press machine 1.svg",
+        "Seated shoulder press machine 2.svg"
+      ],
+      "recomposedPair": false,
+      "author": "Everkinetic",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+      "attributionRequired": true,
+      "attribution": "Everkinetic — CC BY-SA 3.0",
+      "credit": "http://db.everkinetic.com/",
+      "frames": [
+        {
+          "frame": 1,
+          "assetPath": "/exercises/shoulder-press-machine-1.svg",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Seated_shoulder_press_machine_1.svg",
+          "bytes": 17011
+        },
+        {
+          "frame": 2,
+          "assetPath": "/exercises/shoulder-press-machine-2.svg",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Seated_shoulder_press_machine_2.svg",
+          "bytes": 16596
+        }
+      ],
+      "notes": "Planches recolorées à l'affichage (filtre CSS). Les fichiers stockés sont inchangés."
+    },
+    {
+      "exerciseId": "lateral-raise",
+      "commonsFiles": [
+        "Lateral dumbbell raises 1.svg",
+        "Lateral dumbbell raises 2.svg"
+      ],
+      "recomposedPair": false,
+      "author": "Everkinetic",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+      "attributionRequired": true,
+      "attribution": "Everkinetic — CC BY-SA 3.0",
+      "credit": "http://db.everkinetic.com/",
+      "frames": [
+        {
+          "frame": 1,
+          "assetPath": "/exercises/lateral-raise-1.svg",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Lateral_dumbbell_raises_1.svg",
+          "bytes": 15164
+        },
+        {
+          "frame": 2,
+          "assetPath": "/exercises/lateral-raise-2.svg",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Lateral_dumbbell_raises_2.svg",
+          "bytes": 14882
+        }
+      ],
+      "notes": "Planches recolorées à l'affichage (filtre CSS). Les fichiers stockés sont inchangés."
+    },
+    {
+      "exerciseId": "overhead-triceps-extension",
+      "commonsFiles": [
+        "Standing overhead triceps extension with barbell 1.svg",
+        "Standing overhead triceps extension with barbell 2.svg"
+      ],
+      "recomposedPair": false,
+      "author": "Everkinetic",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+      "attributionRequired": true,
+      "attribution": "Everkinetic — CC BY-SA 3.0",
+      "credit": "http://db.everkinetic.com/",
+      "frames": [
+        {
+          "frame": 1,
+          "assetPath": "/exercises/overhead-triceps-extension-1.svg",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Standing_overhead_triceps_extension_with_barbell_1.svg",
+          "bytes": 13639
+        },
+        {
+          "frame": 2,
+          "assetPath": "/exercises/overhead-triceps-extension-2.svg",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Standing_overhead_triceps_extension_with_barbell_2.svg",
+          "bytes": 11947
         }
       ],
       "notes": "Planches recolorées à l'affichage (filtre CSS). Les fichiers stockés sont inchangés."
     },
     {
       "exerciseId": "triceps-pushdown",
-      "commonsBase": "Triceps pushdown with cable",
+      "commonsFiles": [
+        "Triceps pushdown with cable 1.svg",
+        "Triceps pushdown with cable 2.svg"
+      ],
+      "recomposedPair": false,
       "author": "Everkinetic",
       "license": "CC BY-SA 3.0",
       "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
@@ -468,8 +381,534 @@
       "notes": "Planches recolorées à l'affichage (filtre CSS). Les fichiers stockés sont inchangés."
     },
     {
+      "exerciseId": "skull-crusher",
+      "commonsFiles": [
+        "Lying triceps press with barbell 1.svg",
+        "Lying triceps press with barbell 2.svg"
+      ],
+      "recomposedPair": false,
+      "author": "Everkinetic",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+      "attributionRequired": true,
+      "attribution": "Everkinetic — CC BY-SA 3.0",
+      "credit": "http://db.everkinetic.com/",
+      "frames": [
+        {
+          "frame": 1,
+          "assetPath": "/exercises/skull-crusher-1.svg",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Lying_triceps_press_with_barbell_1.svg",
+          "bytes": 13322
+        },
+        {
+          "frame": 2,
+          "assetPath": "/exercises/skull-crusher-2.svg",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Lying_triceps_press_with_barbell_2.svg",
+          "bytes": 13596
+        }
+      ],
+      "notes": "Planches recolorées à l'affichage (filtre CSS). Les fichiers stockés sont inchangés."
+    },
+    {
+      "exerciseId": "pull-up",
+      "commonsFiles": [
+        "Pull ups 1.svg",
+        "Pull ups 2.svg"
+      ],
+      "recomposedPair": false,
+      "author": "Everkinetic",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+      "attributionRequired": true,
+      "attribution": "Everkinetic — CC BY-SA 3.0",
+      "credit": "http://db.everkinetic.com/",
+      "frames": [
+        {
+          "frame": 1,
+          "assetPath": "/exercises/pull-up-1.svg",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Pull_ups_1.svg",
+          "bytes": 14576
+        },
+        {
+          "frame": 2,
+          "assetPath": "/exercises/pull-up-2.svg",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Pull_ups_2.svg",
+          "bytes": 14572
+        }
+      ],
+      "notes": "Planches recolorées à l'affichage (filtre CSS). Les fichiers stockés sont inchangés."
+    },
+    {
+      "exerciseId": "negative-pull-up",
+      "commonsFiles": [
+        "Pull ups 1.svg",
+        "Pull ups 2.svg"
+      ],
+      "recomposedPair": false,
+      "author": "Everkinetic",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+      "attributionRequired": true,
+      "attribution": "Everkinetic — CC BY-SA 3.0",
+      "credit": "http://db.everkinetic.com/",
+      "frames": [
+        {
+          "frame": 1,
+          "assetPath": "/exercises/negative-pull-up-1.svg",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Pull_ups_1.svg",
+          "bytes": 14576
+        },
+        {
+          "frame": 2,
+          "assetPath": "/exercises/negative-pull-up-2.svg",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Pull_ups_2.svg",
+          "bytes": 14572
+        }
+      ],
+      "notes": "Planches recolorées à l'affichage (filtre CSS). Les fichiers stockés sont inchangés."
+    },
+    {
+      "exerciseId": "lat-pulldown",
+      "commonsFiles": [
+        "Wide grip lat pull down 1.svg",
+        "Wide grip lat pull down 2.svg"
+      ],
+      "recomposedPair": false,
+      "author": "Everkinetic",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+      "attributionRequired": true,
+      "attribution": "Everkinetic — CC BY-SA 3.0",
+      "credit": "http://db.everkinetic.com/",
+      "frames": [
+        {
+          "frame": 1,
+          "assetPath": "/exercises/lat-pulldown-1.svg",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Wide_grip_lat_pull_down_1.svg",
+          "bytes": 11643
+        },
+        {
+          "frame": 2,
+          "assetPath": "/exercises/lat-pulldown-2.svg",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Wide_grip_lat_pull_down_2.svg",
+          "bytes": 12755
+        }
+      ],
+      "notes": "Planches recolorées à l'affichage (filtre CSS). Les fichiers stockés sont inchangés."
+    },
+    {
+      "exerciseId": "seated-cable-row",
+      "commonsFiles": [
+        "Seated cable rows 1.svg",
+        "Seated cable rows 2.svg"
+      ],
+      "recomposedPair": false,
+      "author": "Everkinetic",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+      "attributionRequired": true,
+      "attribution": "Everkinetic — CC BY-SA 3.0",
+      "credit": "http://db.everkinetic.com/",
+      "frames": [
+        {
+          "frame": 1,
+          "assetPath": "/exercises/seated-cable-row-1.svg",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Seated_cable_rows_1.svg",
+          "bytes": 11731
+        },
+        {
+          "frame": 2,
+          "assetPath": "/exercises/seated-cable-row-2.svg",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Seated_cable_rows_2.svg",
+          "bytes": 12817
+        }
+      ],
+      "notes": "Planches recolorées à l'affichage (filtre CSS). Les fichiers stockés sont inchangés."
+    },
+    {
+      "exerciseId": "t-bar-row",
+      "commonsFiles": [
+        "T bar rows 1.svg",
+        "T bar rows 2.svg"
+      ],
+      "recomposedPair": false,
+      "author": "Everkinetic",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+      "attributionRequired": true,
+      "attribution": "Everkinetic — CC BY-SA 3.0",
+      "credit": "http://db.everkinetic.com/",
+      "frames": [
+        {
+          "frame": 1,
+          "assetPath": "/exercises/t-bar-row-1.svg",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:T_bar_rows_1.svg",
+          "bytes": 18329
+        },
+        {
+          "frame": 2,
+          "assetPath": "/exercises/t-bar-row-2.svg",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:T_bar_rows_2.svg",
+          "bytes": 18178
+        }
+      ],
+      "notes": "Planches recolorées à l'affichage (filtre CSS). Les fichiers stockés sont inchangés."
+    },
+    {
+      "exerciseId": "preacher-curl",
+      "commonsFiles": [
+        "Preacher curl with machine 1.svg",
+        "Preacher curl with machine 2.svg"
+      ],
+      "recomposedPair": false,
+      "author": "Everkinetic",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+      "attributionRequired": true,
+      "attribution": "Everkinetic — CC BY-SA 3.0",
+      "credit": "http://db.everkinetic.com/",
+      "frames": [
+        {
+          "frame": 1,
+          "assetPath": "/exercises/preacher-curl-1.svg",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Preacher_curl_with_machine_1.svg",
+          "bytes": 13274
+        },
+        {
+          "frame": 2,
+          "assetPath": "/exercises/preacher-curl-2.svg",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Preacher_curl_with_machine_2.svg",
+          "bytes": 11807
+        }
+      ],
+      "notes": "Planches recolorées à l'affichage (filtre CSS). Les fichiers stockés sont inchangés."
+    },
+    {
+      "exerciseId": "incline-curl",
+      "commonsFiles": [
+        "Alternating incline curl with dumbbell 1.svg",
+        "Alternating incline curl with dumbbell 2.svg"
+      ],
+      "recomposedPair": false,
+      "author": "Everkinetic",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+      "attributionRequired": true,
+      "attribution": "Everkinetic — CC BY-SA 3.0",
+      "credit": "http://db.everkinetic.com/",
+      "frames": [
+        {
+          "frame": 1,
+          "assetPath": "/exercises/incline-curl-1.svg",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Alternating_incline_curl_with_dumbbell_1.svg",
+          "bytes": 13735
+        },
+        {
+          "frame": 2,
+          "assetPath": "/exercises/incline-curl-2.svg",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Alternating_incline_curl_with_dumbbell_2.svg",
+          "bytes": 11504
+        }
+      ],
+      "notes": "Planches recolorées à l'affichage (filtre CSS). Les fichiers stockés sont inchangés."
+    },
+    {
+      "exerciseId": "hammer-curl",
+      "commonsFiles": [
+        "Bicep hammer curl with dumbbell 1.svg",
+        "Bicep hammer curl with dumbbell 2.svg"
+      ],
+      "recomposedPair": false,
+      "author": "Everkinetic",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+      "attributionRequired": true,
+      "attribution": "Everkinetic — CC BY-SA 3.0",
+      "credit": "http://db.everkinetic.com/",
+      "frames": [
+        {
+          "frame": 1,
+          "assetPath": "/exercises/hammer-curl-1.svg",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Bicep_hammer_curl_with_dumbbell_1.svg",
+          "bytes": 12084
+        },
+        {
+          "frame": 2,
+          "assetPath": "/exercises/hammer-curl-2.svg",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Bicep_hammer_curl_with_dumbbell_2.svg",
+          "bytes": 10304
+        }
+      ],
+      "notes": "Planches recolorées à l'affichage (filtre CSS). Les fichiers stockés sont inchangés."
+    },
+    {
+      "exerciseId": "biceps-curl",
+      "commonsFiles": [
+        "Bicep curls with barbell 1.svg",
+        "Bicep curls with barbell 2.svg"
+      ],
+      "recomposedPair": false,
+      "author": "Everkinetic",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+      "attributionRequired": true,
+      "attribution": "Everkinetic — CC BY-SA 3.0",
+      "credit": "http://db.everkinetic.com/",
+      "frames": [
+        {
+          "frame": 1,
+          "assetPath": "/exercises/biceps-curl-1.svg",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Bicep_curls_with_barbell_1.svg",
+          "bytes": 14274
+        },
+        {
+          "frame": 2,
+          "assetPath": "/exercises/biceps-curl-2.svg",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Bicep_curls_with_barbell_2.svg",
+          "bytes": 13043
+        }
+      ],
+      "notes": "Planches recolorées à l'affichage (filtre CSS). Les fichiers stockés sont inchangés."
+    },
+    {
+      "exerciseId": "hack-squat",
+      "commonsFiles": [
+        "Hack squat machine 1.svg",
+        "Narrow stance hack squats 2.svg"
+      ],
+      "recomposedPair": true,
+      "author": "Everkinetic",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+      "attributionRequired": true,
+      "attribution": "Everkinetic — CC BY-SA 3.0",
+      "credit": "http://db.everkinetic.com/",
+      "frames": [
+        {
+          "frame": 1,
+          "assetPath": "/exercises/hack-squat-1.svg",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Hack_squat_machine_1.svg",
+          "bytes": 14253
+        },
+        {
+          "frame": 2,
+          "assetPath": "/exercises/hack-squat-2.svg",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Narrow_stance_hack_squats_2.svg",
+          "bytes": 13273
+        }
+      ],
+      "notes": "Paire recomposée : le catalogue n'a pas de seconde position pour ce fichier. Les deux planches montrent la même machine, dans le même style et la même orientation, en position haute puis basse — la seconde est titrée « narrow stance », l'écartement des pieds diffère donc légèrement. Planches recolorées à l'affichage (filtre CSS). Les fichiers stockés sont inchangés."
+    },
+    {
+      "exerciseId": "squat",
+      "commonsFiles": [
+        "Wide stance squat with barbell 1.svg",
+        "Wide stance squat with barbell 2.svg"
+      ],
+      "recomposedPair": false,
+      "author": "Everkinetic",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+      "attributionRequired": true,
+      "attribution": "Everkinetic — CC BY-SA 3.0",
+      "credit": "http://db.everkinetic.com/",
+      "frames": [
+        {
+          "frame": 1,
+          "assetPath": "/exercises/squat-1.svg",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Wide_stance_squat_with_barbell_1.svg",
+          "bytes": 14317
+        },
+        {
+          "frame": 2,
+          "assetPath": "/exercises/squat-2.svg",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Wide_stance_squat_with_barbell_2.svg",
+          "bytes": 12098
+        }
+      ],
+      "notes": "Planches recolorées à l'affichage (filtre CSS). Les fichiers stockés sont inchangés."
+    },
+    {
+      "exerciseId": "front-squat",
+      "commonsFiles": [
+        "Front squat with barbell 1.svg",
+        "Front squat with barbell 2.svg"
+      ],
+      "recomposedPair": false,
+      "author": "Everkinetic",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+      "attributionRequired": true,
+      "attribution": "Everkinetic — CC BY-SA 3.0",
+      "credit": "http://db.everkinetic.com/",
+      "frames": [
+        {
+          "frame": 1,
+          "assetPath": "/exercises/front-squat-1.svg",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Front_squat_with_barbell_1.svg",
+          "bytes": 16943
+        },
+        {
+          "frame": 2,
+          "assetPath": "/exercises/front-squat-2.svg",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Front_squat_with_barbell_2.svg",
+          "bytes": 16149
+        }
+      ],
+      "notes": "Planches recolorées à l'affichage (filtre CSS). Les fichiers stockés sont inchangés."
+    },
+    {
+      "exerciseId": "walking-lunge",
+      "commonsFiles": [
+        "Walking lunges 1.svg",
+        "Walking lunges 2.svg"
+      ],
+      "recomposedPair": false,
+      "author": "Everkinetic",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+      "attributionRequired": true,
+      "attribution": "Everkinetic — CC BY-SA 3.0",
+      "credit": "http://db.everkinetic.com/",
+      "frames": [
+        {
+          "frame": 1,
+          "assetPath": "/exercises/walking-lunge-1.svg",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Walking_lunges_1.svg",
+          "bytes": 15342
+        },
+        {
+          "frame": 2,
+          "assetPath": "/exercises/walking-lunge-2.svg",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Walking_lunges_2.svg",
+          "bytes": 14758
+        }
+      ],
+      "notes": "Planches recolorées à l'affichage (filtre CSS). Les fichiers stockés sont inchangés."
+    },
+    {
+      "exerciseId": "rdl",
+      "commonsFiles": [
+        "Romanian dead lift 1.svg",
+        "Romanian dead lift 2.svg"
+      ],
+      "recomposedPair": false,
+      "author": "Everkinetic",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+      "attributionRequired": true,
+      "attribution": "Everkinetic — CC BY-SA 3.0",
+      "credit": "http://db.everkinetic.com/",
+      "frames": [
+        {
+          "frame": 1,
+          "assetPath": "/exercises/rdl-1.svg",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Romanian_dead_lift_1.svg",
+          "bytes": 13337
+        },
+        {
+          "frame": 2,
+          "assetPath": "/exercises/rdl-2.svg",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Romanian_dead_lift_2.svg",
+          "bytes": 13314
+        }
+      ],
+      "notes": "Planches recolorées à l'affichage (filtre CSS). Les fichiers stockés sont inchangés."
+    },
+    {
+      "exerciseId": "good-morning",
+      "commonsFiles": [
+        "Barbell good mornings 1.svg",
+        "Barbell good mornings 2.svg"
+      ],
+      "recomposedPair": false,
+      "author": "Everkinetic",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+      "attributionRequired": true,
+      "attribution": "Everkinetic — CC BY-SA 3.0",
+      "credit": "http://db.everkinetic.com/",
+      "frames": [
+        {
+          "frame": 1,
+          "assetPath": "/exercises/good-morning-1.svg",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Barbell_good_mornings_1.svg",
+          "bytes": 16155
+        },
+        {
+          "frame": 2,
+          "assetPath": "/exercises/good-morning-2.svg",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Barbell_good_mornings_2.svg",
+          "bytes": 12820
+        }
+      ],
+      "notes": "Planches recolorées à l'affichage (filtre CSS). Les fichiers stockés sont inchangés."
+    },
+    {
+      "exerciseId": "back-extension",
+      "commonsFiles": [
+        "Hyperextensions 1.svg",
+        "Hyperextensions 2.svg"
+      ],
+      "recomposedPair": false,
+      "author": "Everkinetic",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+      "attributionRequired": true,
+      "attribution": "Everkinetic — CC BY-SA 3.0",
+      "credit": "http://db.everkinetic.com/",
+      "frames": [
+        {
+          "frame": 1,
+          "assetPath": "/exercises/back-extension-1.svg",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Hyperextensions_1.svg",
+          "bytes": 12719
+        },
+        {
+          "frame": 2,
+          "assetPath": "/exercises/back-extension-2.svg",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Hyperextensions_2.svg",
+          "bytes": 9681
+        }
+      ],
+      "notes": "Planches recolorées à l'affichage (filtre CSS). Les fichiers stockés sont inchangés."
+    },
+    {
+      "exerciseId": "leg-curl",
+      "commonsFiles": [
+        "Lying leg curl machine 1.svg",
+        "Lying leg curl machine 2.svg"
+      ],
+      "recomposedPair": false,
+      "author": "Everkinetic",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+      "attributionRequired": true,
+      "attribution": "Everkinetic — CC BY-SA 3.0",
+      "credit": "http://db.everkinetic.com/",
+      "frames": [
+        {
+          "frame": 1,
+          "assetPath": "/exercises/leg-curl-1.svg",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Lying_leg_curl_machine_1.svg",
+          "bytes": 12661
+        },
+        {
+          "frame": 2,
+          "assetPath": "/exercises/leg-curl-2.svg",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Lying_leg_curl_machine_2.svg",
+          "bytes": 12513
+        }
+      ],
+      "notes": "Planches recolorées à l'affichage (filtre CSS). Les fichiers stockés sont inchangés."
+    },
+    {
       "exerciseId": "leg-extension",
-      "commonsBase": "Leg extensions",
+      "commonsFiles": [
+        "Leg extensions 1.svg",
+        "Leg extensions 2.svg"
+      ],
+      "recomposedPair": false,
       "author": "Everkinetic",
       "license": "CC BY-SA 3.0",
       "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
@@ -493,8 +932,70 @@
       "notes": "Planches recolorées à l'affichage (filtre CSS). Les fichiers stockés sont inchangés."
     },
     {
+      "exerciseId": "standing-calf-raise",
+      "commonsFiles": [
+        "Standing calf raises using machine 1.svg",
+        "Standing calf raises using machine 2.svg"
+      ],
+      "recomposedPair": false,
+      "author": "Everkinetic",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+      "attributionRequired": true,
+      "attribution": "Everkinetic — CC BY-SA 3.0",
+      "credit": "http://db.everkinetic.com/",
+      "frames": [
+        {
+          "frame": 1,
+          "assetPath": "/exercises/standing-calf-raise-1.svg",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Standing_calf_raises_using_machine_1.svg",
+          "bytes": 10457
+        },
+        {
+          "frame": 2,
+          "assetPath": "/exercises/standing-calf-raise-2.svg",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Standing_calf_raises_using_machine_2.svg",
+          "bytes": 11311
+        }
+      ],
+      "notes": "Planches recolorées à l'affichage (filtre CSS). Les fichiers stockés sont inchangés."
+    },
+    {
+      "exerciseId": "seated-calf-raise",
+      "commonsFiles": [
+        "Seated calf raise using machine 1.svg",
+        "Seated calf raise using machine 2.svg"
+      ],
+      "recomposedPair": false,
+      "author": "Everkinetic",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+      "attributionRequired": true,
+      "attribution": "Everkinetic — CC BY-SA 3.0",
+      "credit": "http://db.everkinetic.com/",
+      "frames": [
+        {
+          "frame": 1,
+          "assetPath": "/exercises/seated-calf-raise-1.svg",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Seated_calf_raise_using_machine_1.svg",
+          "bytes": 12353
+        },
+        {
+          "frame": 2,
+          "assetPath": "/exercises/seated-calf-raise-2.svg",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Seated_calf_raise_using_machine_2.svg",
+          "bytes": 12201
+        }
+      ],
+      "notes": "Planches recolorées à l'affichage (filtre CSS). Les fichiers stockés sont inchangés."
+    },
+    {
       "exerciseId": "weighted-crunch",
-      "commonsBase": "Seated ab crunch with cable",
+      "commonsFiles": [
+        "Seated ab crunch with cable 1.svg",
+        "Seated ab crunch with cable 2.svg"
+      ],
+      "recomposedPair": false,
       "author": "Everkinetic",
       "license": "CC BY-SA 3.0",
       "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",

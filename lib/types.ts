@@ -117,8 +117,6 @@ export type Exercise = {
   machineSetup?: string;
   firstTime?: string[];
   needsSpotter?: boolean;
-  /** nombre de planches illustrées disponibles (voir public/exercises) */
-  plates?: 1 | 2;
   /** unité de mesure par défaut de l'exercice */
   metric?: Metric;
   substitutions: string[];
