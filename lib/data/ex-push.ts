@@ -4,6 +4,7 @@ import { ikPose, lying, reclined, seated, stand } from "./poses";
 export const PUSH_EXERCISES: Exercise[] = [
   {
     id: "bench-press",
+    plates: 2,
     name: "Développé couché",
     shortName: "Développé couché",
     slug: "developpe-couche",
@@ -70,6 +71,7 @@ export const PUSH_EXERCISES: Exercise[] = [
   },
   {
     id: "incline-barbell-press",
+    plates: 2,
     name: "Développé incliné barre",
     shortName: "Développé incliné",
     slug: "developpe-incline-barre",
@@ -122,6 +124,7 @@ export const PUSH_EXERCISES: Exercise[] = [
   },
   {
     id: "incline-db-press",
+    plates: 2,
     name: "Développé incliné haltères",
     shortName: "Incliné haltères",
     slug: "developpe-incline-halteres",
@@ -215,6 +218,7 @@ export const PUSH_EXERCISES: Exercise[] = [
   },
   {
     id: "chest-press",
+    plates: 2,
     name: "Chest press machine",
     shortName: "Chest press",
     slug: "chest-press",
@@ -482,6 +486,7 @@ export const PUSH_EXERCISES: Exercise[] = [
   },
   {
     id: "db-shoulder-press",
+    plates: 2,
     name: "Développé épaules haltères",
     shortName: "Développé haltères",
     slug: "developpe-epaules-halteres",

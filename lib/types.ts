@@ -43,7 +43,8 @@ export type PropSpec =
   | { kind: "machine"; x: number; y: number; w?: number; h?: number; label?: string }
   | { kind: "pulley"; x: number; y: number }
   | { kind: "platform"; x: number; y: number; w?: number; h?: number }
-  | { kind: "step"; x: number; y: number };
+  | { kind: "step"; x: number; y: number }
+  | { kind: "bag"; x: number; y: number; r?: number };
 
 export type LoadSpec =
   | { kind: "barbell"; r?: number }
@@ -110,6 +111,10 @@ export type Exercise = {
   machineSetup?: string;
   firstTime?: string[];
   needsSpotter?: boolean;
+  /** nombre de planches illustrées disponibles (voir public/exercises) */
+  plates?: 1 | 2;
+  /** unité de mesure par défaut de l'exercice */
+  metric?: Metric;
   substitutions: string[];
   media: ExerciseMedia;
   tips: string[];
@@ -119,24 +124,58 @@ export type Exercise = {
 /* ---------- Programme ---------- */
 export type ProgramBlockKind = "force" | "hypertrophie" | "accessoire";
 
+/** Tous les exercices ne se comptent pas en répétitions : un porté se mesure en
+ *  mètres, une suspension en secondes. */
+export type Metric = "reps" | "distance" | "duration";
+
+export type WarmupSet = {
+  /** fraction de la charge de travail (0.4 = 40 %) */
+  loadPct: number;
+  reps: number;
+  restSec: number;
+  note: string;
+};
+
 export type ProgramExercise = {
   exerciseId: string;
   sets: number;
+  metric: Metric;
+  /** metric "reps" */
   repMin: number;
   repMax: number;
+  /** metric "distance" — en mètres */
+  distMin?: number;
+  distMax?: number;
+  /** metric "duration" — en secondes */
+  secMin?: number;
+  secMax?: number;
   restSec: number;
   kind: ProgramBlockKind;
+  /** réserve visée, usage interne : jamais affiché tel quel */
   targetRir: number;
   note?: string;
+  /** séries d'échauffement guidées avant les séries de travail */
+  warmup?: WarmupSet[];
+  /** l'objectif s'entend par jambe / par bras */
+  perSide?: boolean;
+};
+
+export type CardioWarmup = {
+  machine: "tapis" | "velo";
+  minutes: number;
+  instruction: string;
 };
 
 export type WorkoutDay = {
   id: string;
   index: number;
+  /** 0 = lundi */
+  weekday: number;
   name: string;
   focus: string;
   accent: "ember" | "violet" | "cyan" | "volt";
   estimatedMin: number;
+  warmup: CardioWarmup;
   exercises: ProgramExercise[];
 };
 
@@ -182,11 +221,19 @@ export type Profile = {
 /* ---------- Séances réalisées ---------- */
 export type SetLog = {
   setIndex: number;
+  /** répétitions réalisées — 0 pour un porté ou une suspension */
   reps: number;
+  /** mètres parcourus (portés) */
+  distanceM?: number;
+  /** secondes tenues (suspensions, gainage) */
+  seconds?: number;
   weight: number;
+  /** répétitions encore possibles en fin de série (0 à 4). Usage interne. */
   rir: number;
   pain?: boolean;
   ts: string;
+  /** série d'échauffement : comptée dans la séance mais pas dans la progression */
+  warmup?: boolean;
 };
 
 export type ExerciseSession = {

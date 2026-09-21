@@ -127,3 +127,27 @@ export function pingPong(progress: number) {
   const c = Math.min(1, Math.max(0, raw));
   return c < 0.5 ? 4 * c * c * c : 1 - Math.pow(-2 * c + 2, 3) / 2;
 }
+
+/**
+ * Membre fuselé : capsule dont l'épaisseur va de `w1` (côté `a`) à `w2` (côté `b`),
+ * terminée par deux arcs. Beaucoup plus proche d'un corps qu'un trait d'épaisseur
+ * constante, qui est ce qui donnait l'aspect « bonhomme bâton ».
+ */
+export function capsule(a: P, b: P, w1: number, w2: number): string {
+  const dx = b[0] - a[0];
+  const dy = b[1] - a[1];
+  const len = Math.hypot(dx, dy) || 0.0001;
+  const nx = -dy / len;
+  const ny = dx / len;
+  const r1 = w1 / 2;
+  const r2 = w2 / 2;
+  const q = (x: number, y: number) => `${Math.round(x * 100) / 100},${Math.round(y * 100) / 100}`;
+  return [
+    `M${q(a[0] + nx * r1, a[1] + ny * r1)}`,
+    `L${q(b[0] + nx * r2, b[1] + ny * r2)}`,
+    `A${r2},${r2} 0 0 1 ${q(b[0] - nx * r2, b[1] - ny * r2)}`,
+    `L${q(a[0] - nx * r1, a[1] - ny * r1)}`,
+    `A${r1},${r1} 0 0 1 ${q(a[0] + nx * r1, a[1] + ny * r1)}`,
+    "Z",
+  ].join(" ");
+}

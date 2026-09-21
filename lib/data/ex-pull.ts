@@ -54,6 +54,7 @@ export const PULL_EXERCISES: Exercise[] = [
   },
   {
     id: "assisted-pull-up",
+    plates: 2,
     name: "Traction assistée",
     shortName: "Traction assistée",
     slug: "traction-assistee",
@@ -100,6 +101,7 @@ export const PULL_EXERCISES: Exercise[] = [
   },
   {
     id: "lat-pulldown",
+    plates: 2,
     name: "Tirage vertical",
     shortName: "Tirage vertical",
     slug: "tirage-vertical",
@@ -228,6 +230,7 @@ export const PULL_EXERCISES: Exercise[] = [
   },
   {
     id: "seated-cable-row",
+    plates: 2,
     name: "Rowing à la poulie basse",
     shortName: "Rowing poulie",
     slug: "rowing-poulie-basse",
@@ -392,6 +395,7 @@ export const PULL_EXERCISES: Exercise[] = [
   },
   {
     id: "incline-curl",
+    plates: 2,
     name: "Curl incliné",
     slug: "curl-incline",
     pattern: "isolation",
@@ -432,6 +436,7 @@ export const PULL_EXERCISES: Exercise[] = [
   },
   {
     id: "hammer-curl",
+    plates: 2,
     name: "Curl marteau",
     slug: "curl-marteau",
     pattern: "isolation",
@@ -498,6 +503,7 @@ export const PULL_EXERCISES: Exercise[] = [
   },
   {
     id: "triceps-pushdown",
+    plates: 2,
     name: "Extension triceps poulie",
     shortName: "Triceps poulie",
     slug: "extension-triceps-poulie",
@@ -539,6 +545,7 @@ export const PULL_EXERCISES: Exercise[] = [
   },
   {
     id: "overhead-triceps-extension",
+    plates: 2,
     name: "Extension triceps au-dessus de la tête",
     shortName: "Extension nuque",
     slug: "extension-triceps-nuque",

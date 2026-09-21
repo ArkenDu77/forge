@@ -2,8 +2,14 @@ import type { Exercise } from "@/lib/types";
 import { PUSH_EXERCISES } from "./ex-push";
 import { PULL_EXERCISES } from "./ex-pull";
 import { LEG_EXERCISES } from "./ex-legs";
+import { EXTRA_EXERCISES } from "./ex-extra";
 
-export const EXERCISES: Exercise[] = [...PUSH_EXERCISES, ...PULL_EXERCISES, ...LEG_EXERCISES];
+export const EXERCISES: Exercise[] = [
+  ...PUSH_EXERCISES,
+  ...PULL_EXERCISES,
+  ...LEG_EXERCISES,
+  ...EXTRA_EXERCISES,
+];
 
 const BY_ID = new Map(EXERCISES.map((e) => [e.id, e]));
 const BY_SLUG = new Map(EXERCISES.map((e) => [e.slug, e]));

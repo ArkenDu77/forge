@@ -49,6 +49,11 @@
   0%, 100% { transform: translate3d(0,0,0) scale(1); }
   50% { transform: translate3d(0,-14px,0) scale(1.04); }
 }
+@keyframes plate-flip {
+  0%, 38% { opacity: 0; }
+  62%, 100% { opacity: 1; }
+}
+
 @keyframes pulse-ring {
   0% { opacity: .55; transform: scale(.92); }
   70% { opacity: 0; transform: scale(1.35); }
@@ -124,6 +129,11 @@ body {
 @utility num {
   font-variant-numeric: tabular-nums;
   font-feature-settings: "tnum" 1;
+}
+
+/* Fondu entre la position de départ et la position d'arrivée d'une planche. */
+.plate-flip {
+  animation: plate-flip 3s cubic-bezier(0.45, 0, 0.55, 1) infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {

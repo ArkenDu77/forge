@@ -2,7 +2,7 @@
 
 import { useEffect, useId, useMemo, useRef } from "react";
 import type { ExerciseMedia, LoadSpec, PropSpec } from "@/lib/types";
-import { buildSkeleton, lerpPose, pingPong, type P, type Skeleton } from "./figure-math";
+import { buildSkeleton, capsule, lerpPose, pingPong, type P, type Skeleton } from "./figure-math";
 
 export type Accent = "ember" | "violet" | "cyan" | "volt";
 
@@ -14,6 +14,17 @@ export const ACCENTS: Record<Accent, [string, string]> = {
 };
 
 const r2 = (n: number) => Math.round(n * 100) / 100;
+
+/** Épaisseurs des segments : première valeur côté racine, seconde côté extrémité. */
+const W = {
+  torso1: 17, torso2: 21,
+  neck1: 9.5, neck2: 7.5,
+  upper1: 11, upper2: 8.5,
+  fore1: 8.5, fore2: 6,
+  thigh1: 14.5, thigh2: 10,
+  shin1: 10, shin2: 6.5,
+  foot1: 6.5, foot2: 4.5,
+};
 
 /**
  * Silhouette animée pilotée par les données (aucun média sous copyright).
@@ -77,19 +88,20 @@ export function ExerciseFigure({
     };
     const seg = (key: string, a: P, b: P) =>
       set(key, { x1: r2(a[0]), y1: r2(a[1]), x2: r2(b[0]), y2: r2(b[1]) });
+    const limb = (key: string, a: P, b: P, w1: number, w2: number) => set(key, { d: capsule(a, b, w1, w2) });
 
     const apply = (sk: Skeleton) => {
-      seg("far-upper", sk.shoulderL, sk.far.elbow);
-      seg("far-fore", sk.far.elbow, sk.far.wrist);
-      seg("far-thigh", sk.hipL, sk.far.knee);
-      seg("far-shin", sk.far.knee, sk.far.ankle);
-      seg("far-foot", sk.far.ankle, sk.far.toe);
-      seg("neck", sk.shoulder, sk.neck);
-      seg("thigh", sk.hipR, sk.near.knee);
-      seg("shin", sk.near.knee, sk.near.ankle);
-      seg("foot", sk.near.ankle, sk.near.toe);
-      seg("upper", sk.shoulderR, sk.near.elbow);
-      seg("fore", sk.near.elbow, sk.near.wrist);
+      limb("far-upper", sk.shoulderL, sk.far.elbow, W.upper1, W.upper2);
+      limb("far-fore", sk.far.elbow, sk.far.wrist, W.fore1, W.fore2);
+      limb("far-thigh", sk.hipL, sk.far.knee, W.thigh1, W.thigh2);
+      limb("far-shin", sk.far.knee, sk.far.ankle, W.shin1, W.shin2);
+      limb("far-foot", sk.far.ankle, sk.far.toe, W.foot1, W.foot2);
+      limb("neck", sk.shoulder, sk.neck, W.neck1, W.neck2);
+      limb("thigh", sk.hipR, sk.near.knee, W.thigh1, W.thigh2);
+      limb("shin", sk.near.knee, sk.near.ankle, W.shin1, W.shin2);
+      limb("foot", sk.near.ankle, sk.near.toe, W.foot1, W.foot2);
+      limb("upper", sk.shoulderR, sk.near.elbow, W.upper1, W.upper2);
+      limb("fore", sk.near.elbow, sk.near.wrist, W.fore1, W.fore2);
       set("head", { cx: r2(sk.head[0]), cy: r2(sk.head[1]) });
       set("glow", { cx: r2(sk.hip[0]) });
       if (sk.view === "front") {
@@ -99,7 +111,7 @@ export function ExerciseFigure({
           )},${r2(sk.hipR[1])} L${r2(sk.hipL[0])},${r2(sk.hipL[1])} Z`,
         });
       } else {
-        seg("torso", sk.hip, sk.shoulder);
+        limb("torso", sk.hip, sk.shoulder, W.torso1, W.torso2);
       }
       const w = sk.near.wrist;
       const wl = sk.far.wrist;
@@ -148,17 +160,18 @@ export function ExerciseFigure({
   /* eslint-enable react-hooks/refs */
   const g = `url(#bd-${uid})`;
 
-  const bone = ({ k, a, b, w, opacity = 1, stroke = g }: { k: string; a: P; b: P; w: number; opacity?: number; stroke?: string }) => (
-    <line
+  const INK = "rgba(9,11,16,.93)";
+  const bone = ({
+    k, a, b, w1, w2, opacity = 1, stroke = c1,
+  }: { k: string; a: P; b: P; w1: number; w2: number; opacity?: number; stroke?: string }) => (
+    <path
       key={k}
       ref={reg(k)}
-      x1={r2(a[0])}
-      y1={r2(a[1])}
-      x2={r2(b[0])}
-      y2={r2(b[1])}
+      d={capsule(a, b, w1, w2)}
+      fill={INK}
       stroke={stroke}
-      strokeWidth={w}
-      strokeLinecap="round"
+      strokeWidth="2.1"
+      strokeLinejoin="round"
       opacity={opacity}
     />
   );
@@ -172,7 +185,7 @@ export function ExerciseFigure({
             <stop offset="100%" stopColor={c2} />
           </linearGradient>
           <radialGradient id={`gl-${uid}`}>
-            <stop offset="0%" stopColor={c2} stopOpacity="0.3" />
+            <stop offset="0%" stopColor={c2} stopOpacity="0.16" />
             <stop offset="100%" stopColor={c2} stopOpacity="0" />
           </radialGradient>
           <filter id={`sh-${uid}`} x="-40%" y="-40%" width="180%" height="180%">
@@ -196,13 +209,13 @@ export function ExerciseFigure({
           <path d={trail} fill="none" stroke={c2} strokeWidth="1.4" strokeDasharray="3 4.5" strokeLinecap="round" opacity="0.4" />
         )}
 
-        <g filter={`url(#sh-${uid})`}>
+        <g>
           <g opacity="0.28">
-            {bone({ k: "far-upper", a: initial.shoulderL, b: initial.far.elbow, w: 8.5, stroke: c2 })}
-            {bone({ k: "far-fore", a: initial.far.elbow, b: initial.far.wrist, w: 7.5, stroke: c2 })}
-            {bone({ k: "far-thigh", a: initial.hipL, b: initial.far.knee, w: 9.5, stroke: c2 })}
-            {bone({ k: "far-shin", a: initial.far.knee, b: initial.far.ankle, w: 8.5, stroke: c2 })}
-            {bone({ k: "far-foot", a: initial.far.ankle, b: initial.far.toe, w: 6.5, stroke: c2 })}
+            {bone({ k: "far-upper", a: initial.shoulderL, b: initial.far.elbow, w1: W.upper1, w2: W.upper2, stroke: c2 })}
+            {bone({ k: "far-fore", a: initial.far.elbow, b: initial.far.wrist, w1: W.fore1, w2: W.fore2, stroke: c2 })}
+            {bone({ k: "far-thigh", a: initial.hipL, b: initial.far.knee, w1: W.thigh1, w2: W.thigh2, stroke: c2 })}
+            {bone({ k: "far-shin", a: initial.far.knee, b: initial.far.ankle, w1: W.shin1, w2: W.shin2, stroke: c2 })}
+            {bone({ k: "far-foot", a: initial.far.ankle, b: initial.far.toe, w1: W.foot1, w2: W.foot2, stroke: c2 })}
           </g>
 
           {media.view === "front" ? (
@@ -211,23 +224,23 @@ export function ExerciseFigure({
               d={`M${r2(initial.shoulderL[0])},${r2(initial.shoulderL[1])} L${r2(initial.shoulderR[0])},${r2(
                 initial.shoulderR[1]
               )} L${r2(initial.hipR[0])},${r2(initial.hipR[1])} L${r2(initial.hipL[0])},${r2(initial.hipL[1])} Z`}
-              fill={g}
-              stroke={g}
-              strokeWidth="9"
+              fill="rgba(9,11,16,.93)"
+              stroke={c1}
+              strokeWidth="2.1"
               strokeLinejoin="round"
             />
           ) : (
-            bone({ k: "torso", a: initial.hip, b: initial.shoulder, w: 19 })
+            bone({ k: "torso", a: initial.hip, b: initial.shoulder, w1: W.torso1, w2: W.torso2 })
           )}
 
-          {bone({ k: "neck", a: initial.shoulder, b: initial.neck, w: 9 })}
-          <circle ref={reg("head")} cx={r2(initial.head[0])} cy={r2(initial.head[1])} r="9.5" fill={g} />
+          {bone({ k: "neck", a: initial.shoulder, b: initial.neck, w1: W.neck1, w2: W.neck2 })}
+          <circle ref={reg("head")} cx={r2(initial.head[0])} cy={r2(initial.head[1])} r="8.6" fill="rgba(9,11,16,.93)" stroke={c1} strokeWidth="2.1" />
 
-          {bone({ k: "thigh", a: initial.hipR, b: initial.near.knee, w: 11 })}
-          {bone({ k: "shin", a: initial.near.knee, b: initial.near.ankle, w: 9.5 })}
-          {bone({ k: "foot", a: initial.near.ankle, b: initial.near.toe, w: 7 })}
-          {bone({ k: "upper", a: initial.shoulderR, b: initial.near.elbow, w: 9.5 })}
-          {bone({ k: "fore", a: initial.near.elbow, b: initial.near.wrist, w: 8.5 })}
+          {bone({ k: "thigh", a: initial.hipR, b: initial.near.knee, w1: W.thigh1, w2: W.thigh2 })}
+          {bone({ k: "shin", a: initial.near.knee, b: initial.near.ankle, w1: W.shin1, w2: W.shin2 })}
+          {bone({ k: "foot", a: initial.near.ankle, b: initial.near.toe, w1: W.foot1, w2: W.foot2 })}
+          {bone({ k: "upper", a: initial.shoulderR, b: initial.near.elbow, w1: W.upper1, w2: W.upper2 })}
+          {bone({ k: "fore", a: initial.near.elbow, b: initial.near.wrist, w1: W.fore1, w2: W.fore2 })}
         </g>
 
         <LoadShape load={media.load} sk={initial} c1={c1} uid={uid} reg={reg} front={media.view === "front"} />
@@ -308,6 +321,30 @@ function PropShape({ spec }: { spec: PropSpec }) {
       );
     case "platform":
       return <rect x={spec.x - (spec.w ?? 40) / 2} y={spec.y} width={spec.w ?? 40} height={spec.h ?? 8} rx="4" fill={steelSoft} />;
+    case "bag":
+      return (
+        <g>
+          <rect
+            x={spec.x - (spec.r ?? 16)}
+            y={spec.y - (spec.r ?? 16) * 0.8}
+            width={(spec.r ?? 16) * 2}
+            height={(spec.r ?? 16) * 1.6}
+            rx={(spec.r ?? 16) * 0.42}
+            fill={steelSoft}
+            stroke={steel}
+            strokeWidth="2"
+          />
+          <line
+            x1={spec.x - (spec.r ?? 16) * 0.6}
+            y1={spec.y - (spec.r ?? 16) * 0.8}
+            x2={spec.x + (spec.r ?? 16) * 0.6}
+            y2={spec.y - (spec.r ?? 16) * 0.8}
+            stroke={steel}
+            strokeWidth="3"
+            strokeLinecap="round"
+          />
+        </g>
+      );
     case "step":
       return (
         <g>

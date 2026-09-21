@@ -1,104 +1,241 @@
-import type { ProgramExercise, WorkoutDay, WorkoutProgram } from "@/lib/types";
+import type { ProgramExercise, WarmupSet, WorkoutDay, WorkoutProgram } from "@/lib/types";
 
-const e = (
+/* ------------------------------------------------------------------
+   Programme Lundi / Mardi / Jeudi / Samedi — muscle et force.
+   Mercredi, vendredi et dimanche sont des jours de repos.
+   ------------------------------------------------------------------ */
+
+/** Séries d'échauffement des gros mouvements : montée en charge guidée. */
+const RAMP: WarmupSet[] = [
+  { loadPct: 0.4, reps: 10, restSec: 60, note: "Très léger. Tu dois finir en te disant « c'était facile »." },
+  { loadPct: 0.7, reps: 5, restSec: 60, note: "Un peu plus lourd. Cinq répétitions propres, sans forcer." },
+];
+
+/** Exercice compté en répétitions. */
+const reps = (
   exerciseId: string,
   sets: number,
   repMin: number,
   repMax: number,
   restSec: number,
   kind: ProgramExercise["kind"],
-  targetRir: number,
-  note?: string
-): ProgramExercise => ({ exerciseId, sets, repMin, repMax, restSec, kind, targetRir, note });
+  extra: Partial<ProgramExercise> = {}
+): ProgramExercise => ({
+  exerciseId,
+  sets,
+  metric: "reps",
+  repMin,
+  repMax,
+  restSec,
+  kind,
+  targetRir: kind === "force" ? 2 : 1,
+  ...extra,
+});
 
-/** Durée estimée : séries × (repos + ~40 s d'exécution) + 8 min d'échauffement/transitions. */
-export function estimateMinutes(exercises: ProgramExercise[]) {
-  const seconds = exercises.reduce((acc, x) => acc + x.sets * (x.restSec + 40), 0);
-  return Math.round((seconds / 60 + 8) / 5) * 5;
+/** Exercice compté en mètres parcourus. */
+const carry = (
+  exerciseId: string,
+  sets: number,
+  distMin: number,
+  distMax: number,
+  restSec: number,
+  extra: Partial<ProgramExercise> = {}
+): ProgramExercise => ({
+  exerciseId,
+  sets,
+  metric: "distance",
+  repMin: 0,
+  repMax: 0,
+  distMin,
+  distMax,
+  restSec,
+  kind: "accessoire",
+  targetRir: 1,
+  ...extra,
+});
+
+/** Exercice compté en secondes tenues. */
+const hold = (
+  exerciseId: string,
+  sets: number,
+  secMin: number,
+  secMax: number,
+  restSec: number,
+  extra: Partial<ProgramExercise> = {}
+): ProgramExercise => ({
+  exerciseId,
+  sets,
+  metric: "duration",
+  repMin: 0,
+  repMax: 0,
+  secMin,
+  secMax,
+  restSec,
+  kind: "accessoire",
+  targetRir: 1,
+  ...extra,
+});
+
+/** Durée estimée : séries × (repos + exécution) + échauffement cardio + transitions. */
+export function estimateMinutes(day: Omit<WorkoutDay, "estimatedMin">) {
+  const work = day.exercises.reduce((acc, x) => {
+    const perSet = x.metric === "reps" ? 40 : x.metric === "distance" ? 45 : 35;
+    const warm = (x.warmup?.length ?? 0) * (60 + 30);
+    return acc + x.sets * (x.restSec + perSet) + warm;
+  }, 0);
+  return Math.round((work / 60 + day.warmup.minutes + 6) / 5) * 5;
 }
 
 function day(d: Omit<WorkoutDay, "estimatedMin">): WorkoutDay {
-  return { ...d, estimatedMin: estimateMinutes(d.exercises) };
+  return { ...d, estimatedMin: estimateMinutes(d) };
 }
 
-export const DAY_1 = day({
-  id: "j1",
+const TAPIS = {
+  machine: "tapis" as const,
+  minutes: 6,
+  instruction: "Marche rapide, à un rythme où tu pourrais encore parler. Pas de course.",
+};
+
+const VELO = {
+  machine: "velo" as const,
+  minutes: 6,
+  instruction: "Résistance faible à moyenne, pédalage régulier. Tu dois avoir juste un peu chaud à la fin.",
+};
+
+export const LUNDI = day({
+  id: "lundi",
   index: 1,
+  weekday: 0,
   name: "Haut du corps",
-  focus: "Force",
+  focus: "Séance A",
   accent: "ember",
+  warmup: TAPIS,
   exercises: [
-    e("bench-press", 3, 4, 6, 180, "force", 2, "Exercice principal : garde 1 à 2 reps en réserve."),
-    e("pull-up", 3, 5, 8, 150, "force", 2, "Lestées si tu dépasses 8 répétitions propres."),
-    e("chest-supported-row", 3, 6, 8, 120, "force", 2),
-    e("overhead-press", 2, 5, 8, 150, "force", 2),
-    e("incline-db-press", 2, 8, 12, 90, "hypertrophie", 1),
-    e("lateral-raise", 3, 12, 20, 60, "accessoire", 1),
-    e("biceps-curl", 2, 8, 12, 60, "accessoire", 1),
-    e("triceps-pushdown", 2, 8, 12, 60, "accessoire", 1),
+    reps("bench-press", 4, 4, 6, 180, "force", {
+      warmup: RAMP,
+      note: "L'exercice principal de la semaine pour les pectoraux.",
+    }),
+    reps("assisted-pull-up", 4, 5, 8, 150, "force", {
+      note: "Règle l'assistance pour finir chaque série difficilement mais proprement.",
+    }),
+    reps("incline-db-press", 3, 8, 12, 120, "hypertrophie"),
+    reps("chest-supported-row", 3, 6, 10, 120, "hypertrophie"),
+    reps("db-shoulder-press", 3, 6, 10, 150, "hypertrophie"),
+    reps("lateral-raise", 3, 12, 20, 90, "accessoire"),
+    reps("overhead-triceps-extension", 3, 10, 15, 90, "accessoire"),
+    reps("incline-curl", 3, 8, 12, 90, "accessoire"),
+    reps("negative-pull-up", 2, 3, 3, 90, "accessoire", {
+      note: "Trois descentes par série, chacune en 4 à 5 secondes.",
+    }),
   ],
 });
 
-export const DAY_2 = day({
-  id: "j2",
+export const MARDI = day({
+  id: "mardi",
   index: 2,
+  weekday: 1,
   name: "Bas du corps",
-  focus: "Force",
+  focus: "Séance A + poigne",
   accent: "violet",
+  warmup: VELO,
   exercises: [
-    e("squat", 3, 4, 6, 210, "force", 2, "Stoppeurs réglés avant la première série."),
-    e("rdl", 3, 6, 8, 150, "force", 2, "Le dos plat est le critère d'arrêt de la descente."),
-    e("leg-press", 3, 8, 12, 120, "hypertrophie", 1),
-    e("leg-curl", 3, 8, 12, 90, "hypertrophie", 1),
-    e("standing-calf-raise", 3, 10, 15, 60, "accessoire", 1),
-    e("weighted-crunch", 3, 8, 15, 60, "accessoire", 1),
+    reps("hack-squat", 3, 5, 8, 180, "force", { warmup: RAMP }),
+    reps("rdl", 3, 6, 10, 180, "force", {
+      warmup: RAMP,
+      note: "Le dos plat est le signal d'arrêt de la descente.",
+    }),
+    reps("leg-press", 3, 10, 15, 120, "hypertrophie"),
+    reps("leg-curl", 3, 10, 15, 90, "hypertrophie"),
+    reps("standing-calf-raise", 3, 10, 15, 90, "accessoire"),
+    carry("farmer-carry", 4, 20, 30, 120, {
+      note: "Un passage = un aller. Repose les haltères entre chaque.",
+    }),
+    hold("dead-hang", 3, 20, 45, 90),
   ],
 });
 
-export const DAY_3 = day({
-  id: "j3",
+export const JEUDI = day({
+  id: "jeudi",
   index: 3,
+  weekday: 3,
   name: "Haut du corps",
-  focus: "Hypertrophie",
+  focus: "Séance B",
   accent: "cyan",
+  warmup: TAPIS,
   exercises: [
-    e("incline-barbell-press", 3, 6, 10, 150, "hypertrophie", 1),
-    e("lat-pulldown", 3, 8, 12, 120, "hypertrophie", 1),
-    e("machine-row", 3, 8, 12, 120, "hypertrophie", 1),
-    e("chest-press", 2, 8, 12, 90, "hypertrophie", 1),
-    e("shoulder-press-machine", 2, 8, 12, 90, "hypertrophie", 1),
-    e("lateral-raise", 3, 12, 20, 60, "accessoire", 0),
-    e("incline-curl", 3, 8, 15, 60, "accessoire", 1),
-    e("overhead-triceps-extension", 3, 8, 15, 60, "accessoire", 1),
+    reps("incline-barbell-press", 4, 6, 10, 150, "force", { warmup: RAMP }),
+    reps("lat-pulldown", 3, 8, 12, 120, "hypertrophie"),
+    reps("chest-press", 3, 8, 12, 120, "hypertrophie"),
+    reps("seated-cable-row", 3, 8, 12, 120, "hypertrophie", {
+      perSide: true,
+      note: "Un bras à la fois : l'objectif s'entend par bras.",
+    }),
+    reps("lateral-raise", 4, 12, 20, 90, "accessoire"),
+    reps("reverse-pec-deck", 3, 12, 20, 90, "accessoire"),
+    reps("preacher-curl", 3, 8, 12, 90, "accessoire"),
+    reps("hammer-curl", 2, 10, 15, 90, "accessoire"),
+    reps("overhead-triceps-extension", 3, 10, 15, 90, "accessoire"),
+    reps("triceps-pushdown", 2, 10, 15, 90, "accessoire"),
   ],
 });
 
-export const DAY_4 = day({
-  id: "j4",
+export const SAMEDI = day({
+  id: "samedi",
   index: 4,
+  weekday: 5,
   name: "Bas du corps",
-  focus: "Hypertrophie",
+  focus: "Séance B + force",
   accent: "volt",
+  warmup: VELO,
   exercises: [
-    e("hack-squat", 3, 6, 10, 180, "hypertrophie", 1),
-    e("bulgarian-split-squat", 3, 8, 12, 120, "hypertrophie", 1, "Répétitions par jambe."),
-    e("hip-thrust", 3, 8, 12, 120, "hypertrophie", 1),
-    e("leg-curl", 3, 10, 15, 90, "hypertrophie", 1),
-    e("leg-extension", 2, 10, 15, 60, "accessoire", 0),
-    e("seated-calf-raise", 3, 10, 20, 60, "accessoire", 0),
+    reps("trap-bar-deadlift", 3, 3, 5, 210, "force", {
+      warmup: RAMP,
+      note: "La séance de force de la semaine. Technique avant charge.",
+    }),
+    reps("bulgarian-split-squat", 3, 8, 12, 120, "hypertrophie", {
+      perSide: true,
+      note: "L'objectif s'entend par jambe : tu fais donc la série deux fois.",
+    }),
+    reps("hip-thrust", 3, 8, 12, 120, "hypertrophie"),
+    reps("leg-extension", 2, 10, 15, 90, "accessoire"),
+    reps("leg-curl", 2, 10, 15, 90, "accessoire"),
+    carry("sandbag-carry", 4, 15, 30, 120),
+    reps("weighted-crunch", 3, 10, 15, 90, "accessoire"),
   ],
 });
 
 export const DEFAULT_PROGRAM: WorkoutProgram = {
-  id: "muscle-force-4j",
-  name: "Muscle & Force — 4 jours",
+  id: "muscle-force-4j-v2",
+  name: "Muscle & Force",
   goal: "muscle-force",
   daysPerWeek: 4,
-  days: [DAY_1, DAY_2, DAY_3, DAY_4],
+  days: [LUNDI, MARDI, JEUDI, SAMEDI],
 };
 
 export const ALL_DAYS = DEFAULT_PROGRAM.days;
 
 export function getDay(id: string) {
   return ALL_DAYS.find((d) => d.id === id);
+}
+
+export const WEEKDAY_LABELS = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
+
+/* ------------------------------------------------------------------
+   Phase d'adaptation : les deux premières semaines, on allège le volume
+   d'isolation pour éviter des courbatures qui empêchent la séance suivante.
+   ------------------------------------------------------------------ */
+
+export const ADAPTATION_WEEKS = 2;
+
+export function adaptForWeek(d: WorkoutDay, week: number): WorkoutDay {
+  if (week > ADAPTATION_WEEKS) return d;
+  const exercises = d.exercises.map((x) =>
+    x.kind === "accessoire" && x.sets > 2 ? { ...x, sets: Math.max(2, x.sets - 1) } : x
+  );
+  return { ...d, exercises, estimatedMin: estimateMinutes({ ...d, exercises }) };
+}
+
+export function adaptationLabel(week: number) {
+  if (week > ADAPTATION_WEEKS) return null;
+  return `Phase d'adaptation — semaine ${Math.min(week, ADAPTATION_WEEKS)}/${ADAPTATION_WEEKS}`;
 }
