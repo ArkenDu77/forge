@@ -51,11 +51,35 @@ function displayWeight(exercise: Exercise, weight: number) {
  */
 export function recommendLoad(
   exercise: Exercise,
-  target: Pick<ProgramExercise, "sets" | "repMin" | "repMax" | "targetRir">,
+  target: Pick<ProgramExercise, "sets" | "repMin" | "repMax" | "targetRir"> & Partial<Pick<ProgramExercise, "metric">>,
   history: PerfEntry[],
   profile: Profile
 ): LoadRecommendation {
   const est = estimateStartingLoad(exercise, profile);
+
+  // Portés et suspensions : on ne progresse pas en répétitions mais en distance
+  // ou en durée. Le poids reste celui de la dernière fois.
+  if (target.metric && target.metric !== "reps") {
+    const previous = history.length ? workingWeight(history[0].sets) : null;
+    const weight = previous ?? est.weight;
+    const unit = target.metric === "distance" ? "la distance" : "le temps";
+    return {
+      weight,
+      previousWeight: previous,
+      delta: 0,
+      headline: previous === null ? "Premier essai" : "Même charge que la dernière fois",
+      source: previous === null ? "estimation" : "historique",
+      deload: false,
+      display: displayWeight(exercise, weight),
+      reasons: [
+        previous === null
+          ? { ok: true, text: "Choisis une charge que tu es sûr de pouvoir tenir jusqu'au bout." }
+          : { ok: true, text: `La dernière fois : ${displayWeight(exercise, previous)}` },
+        { ok: true, text: `Ici, tu progresses en augmentant ${unit}, pas le poids.` },
+        { ok: true, text: "Quand tu tiens le haut de la fourchette facilement, ajoute du poids." },
+      ],
+    };
+  }
 
   if (history.length === 0) {
     return {
@@ -196,6 +220,18 @@ export function detectPRs(exerciseId: string, sets: SetLog[], history: PerfEntry
   if (!sets.length) return [];
   const past = history.flatMap((h) => h.sets);
   const out: PrCandidate[] = [];
+
+  // Portés et suspensions : le record est la meilleure distance ou la meilleure durée.
+  const bestDistance = Math.max(0, ...sets.map((s) => s.distanceM ?? 0));
+  const bestSeconds = Math.max(0, ...sets.map((s) => s.seconds ?? 0));
+  if (bestDistance > 0) {
+    const pastBest = Math.max(0, ...past.map((s) => s.distanceM ?? 0));
+    return bestDistance > pastBest && past.length > 0 ? [{ kind: "reps", value: bestDistance }] : [];
+  }
+  if (bestSeconds > 0) {
+    const pastBest = Math.max(0, ...past.map((s) => s.seconds ?? 0));
+    return bestSeconds > pastBest && past.length > 0 ? [{ kind: "reps", value: bestSeconds }] : [];
+  }
 
   const w = workingWeight(sets);
   const pastBestWeight = past.length ? Math.max(...past.map((s) => s.weight)) : 0;
