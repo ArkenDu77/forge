@@ -324,3 +324,8 @@ export const SLOTS: { id: "petit-dejeuner" | "dejeuner" | "diner" | "snack"; lab
   { id: "snack", label: "Collation", when: "Après-midi" },
   { id: "diner", label: "Dîner", when: "Le soir" },
 ];
+
+/** Libellé affichable d'une étiquette de recette : jamais l'identifiant brut. */
+export function tagLabel(tag: Recipe["tags"][number]) {
+  return RECIPE_TAGS.find((t) => t.id === tag)?.label ?? tag;
+}

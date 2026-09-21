@@ -13,7 +13,7 @@ import { currentStreak } from "@/lib/progression";
 import { MUSCLE_GROUPS, muscleName } from "@/lib/data/muscles";
 import { buildDemoData } from "@/lib/seed";
 import { SAFETY, PRINCIPLES } from "@/lib/copy";
-import { today } from "@/lib/format";
+import { kg, today } from "@/lib/format";
 import type { MuscleId, RecoveryCheckin } from "@/lib/types";
 
 export default function ProfilPage() {
@@ -84,8 +84,8 @@ export default function ProfilPage() {
 
       <div className="mb-4 grid grid-cols-2 gap-2">
         {[
-          { l: "Poids", v: `${profile.weightKg} kg` },
-          { l: "Objectif", v: `${profile.targetWeightKg} kg` },
+          { l: "Poids", v: kg(profile.weightKg) },
+          { l: "Objectif", v: kg(profile.targetWeightKg) },
           { l: "Taille", v: `${profile.heightCm} cm` },
           { l: "Séances / sem.", v: profile.daysAvailable },
         ].map((s) => (

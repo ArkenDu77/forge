@@ -5,7 +5,7 @@ import { use, useState } from "react";
 import { Page, TopBar } from "@/components/AppShell";
 import { Icon } from "@/components/ui/Icon";
 import { Badge, Button, Card, SectionTitle } from "@/components/ui/primitives";
-import { getRecipeBySlug } from "@/lib/data/recipes";
+import { getRecipeBySlug, tagLabel } from "@/lib/data/recipes";
 import { useApp } from "@/lib/store";
 import { scaleMacros } from "@/lib/nutrition";
 import { eur, today } from "@/lib/format";
@@ -22,7 +22,7 @@ export default function RecipePage({ params }: PageProps<"/nutrition/recettes/[s
 
   return (
     <Page>
-      <TopBar title={recipe.name} subtitle={`${recipe.minutes} min · ${recipe.servings} portion(s)`} back="/nutrition/recettes" />
+      <TopBar title={recipe.name} subtitle={`${recipe.minutes} min · ${recipe.servings} portion${recipe.servings > 1 ? "s" : ""}`} back="/nutrition/recettes" />
 
       <div
         className="mb-4 flex h-40 items-center justify-center rounded-3xl text-7xl"
@@ -33,7 +33,7 @@ export default function RecipePage({ params }: PageProps<"/nutrition/recettes/[s
 
       <div className="mb-4 flex flex-wrap gap-1.5">
         {recipe.tags.map((t) => (
-          <Badge key={t}>{t.replace("-", " ")}</Badge>
+          <Badge key={t}>{tagLabel(t)}</Badge>
         ))}
       </div>
 
