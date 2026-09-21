@@ -115,8 +115,11 @@ export const LUNDI = day({
       warmup: RAMP,
       note: "L'exercice principal de la semaine pour les pectoraux.",
     }),
+    // Pas de séries d'échauffement ici : sur cette machine, le poids réglé est
+    // l'aide, pas la charge. Monter progressivement reviendrait à retirer de
+    // l'aide, donc à commencer par le plus dur. La première série sert de repère.
     reps("assisted-pull-up", 4, 5, 8, 150, "force", {
-      note: "Règle l'assistance pour finir chaque série difficilement mais proprement.",
+      note: "Règle l'assistance pour finir chaque série difficilement mais proprement. Prends la première série tranquillement : elle sert à trouver le bon réglage.",
     }),
     reps("incline-db-press", 3, 8, 12, 120, "hypertrophie"),
     reps("chest-supported-row", 3, 6, 10, 120, "hypertrophie"),
@@ -197,8 +200,8 @@ export const SAMEDI = day({
       note: "L'objectif s'entend par jambe : tu fais donc la série deux fois.",
     }),
     reps("hip-thrust", 3, 8, 12, 120, "hypertrophie"),
-    reps("leg-extension", 2, 10, 15, 90, "accessoire"),
-    reps("leg-curl", 2, 10, 15, 90, "accessoire"),
+    reps("leg-extension", 3, 10, 15, 90, "accessoire"),
+    reps("leg-curl", 3, 10, 15, 90, "accessoire"),
     carry("sandbag-carry", 4, 15, 30, 120),
     reps("weighted-crunch", 3, 10, 15, 90, "accessoire"),
   ],

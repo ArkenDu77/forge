@@ -531,11 +531,13 @@ export default function WorkoutPage({ params }: PageProps<"/seance/[dayId]">) {
                       }
                       increment={exercise.increment}
                       suffix={
-                        exercise.loadModel === "dumbbell-pair"
-                          ? "dans chaque main"
-                          : exercise.loadModel === "bodyweight-loaded"
-                            ? "de lest en plus de ton poids"
-                            : undefined
+                        exercise.assistance
+                          ? "d'aide de la machine"
+                          : exercise.loadModel === "dumbbell-pair"
+                            ? "dans chaque main"
+                            : exercise.loadModel === "bodyweight-loaded"
+                              ? "de lest en plus de ton poids"
+                              : undefined
                       }
                     />
                     {!inWarmup && <WhyThisLoad reco={reco} />}

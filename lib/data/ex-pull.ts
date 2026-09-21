@@ -63,6 +63,7 @@ export const PULL_EXERCISES: Exercise[] = [
     primary: ["dorsaux"],
     secondary: ["biceps", "trapezes"],
     loadModel: "machine",
+    assistance: true,
     increment: 5,
     technical: 2,
     startFactor: 0,

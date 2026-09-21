@@ -7,19 +7,24 @@ import { Page, TopBar } from "@/components/AppShell";
 import { ExerciseMedia } from "@/components/exercise/ExerciseMedia";
 import { Icon } from "@/components/ui/Icon";
 import { Badge, Card, Chip, cx } from "@/components/ui/primitives";
-import { ALL_DAYS, WEEKDAY_LABELS } from "@/lib/data/program";
+import { adaptForWeek, ALL_DAYS, WEEKDAY_LABELS } from "@/lib/data/program";
 import { EXERCISES, ex } from "@/lib/data/exercises";
 import { MUSCLE_GROUPS, muscleName } from "@/lib/data/muscles";
 import { coachingFor } from "@/lib/data/coaching";
 import { useApp } from "@/lib/store";
 import { dayForToday, lastSessionFor } from "@/lib/session";
 import { relativeDay } from "@/lib/format";
+import { weeksSince } from "@/lib/projection";
 
 const REST_DAYS = [2, 4, 6];
 
 export default function ProgrammePage() {
   const sessions = useApp((s) => s.sessions);
-  const today = dayForToday();
+  const profile = useApp((s) => s.profile);
+  // Même semaine de programme que les fiches de séance : sans ça, la liste
+  // annoncerait une durée que l'écran suivant contredit.
+  const week = profile ? weeksSince(profile.createdAt) + 1 : 99;
+  const today = dayForToday(week);
   const [q, setQ] = useState("");
   const [group, setGroup] = useState<string>("tous");
 
@@ -39,7 +44,8 @@ export default function ProgrammePage() {
 
       <div className="mb-6 space-y-2.5">
         {WEEKDAY_LABELS.map((label, weekday) => {
-          const day = ALL_DAYS.find((d) => d.weekday === weekday);
+          const raw = ALL_DAYS.find((d) => d.weekday === weekday);
+          const day = raw ? adaptForWeek(raw, week) : undefined;
           const isToday = today?.weekday === weekday || (!today && false);
           const isRest = REST_DAYS.includes(weekday);
 

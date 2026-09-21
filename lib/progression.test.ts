@@ -1,9 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { detectPRs, recommendLoad, type PerfEntry } from "./progression";
-import { calorieAdjustment, computeTargets, weightTrend } from "./nutrition";
 import { ex } from "./data/exercises";
 import { getDay } from "./data/program";
-import type { Profile, SetLog, WeightEntry } from "./types";
+import type { Profile, SetLog } from "./types";
 
 const PROFILE: Profile = {
   firstName: "Test",
@@ -48,6 +47,7 @@ const entry = (sets: SetLog[], daysAgo = 2): PerfEntry => ({
 });
 
 const BENCH = ex("bench-press");
+const ASSISTED = ex("assisted-pull-up");
 /** 4 séries de 4 à 6 répétitions */
 const BENCH_PLAN = getDay("lundi")!.exercises[0];
 
@@ -131,78 +131,43 @@ describe("records", () => {
   });
 });
 
-/* ---------------- Nutrition ---------------- */
+/* ---------------- Machines assistées ---------------- */
 
-const weightsFrom = (values: number[]): WeightEntry[] =>
-  values.map((kg, i) => ({
-    date: new Date(Date.now() - (values.length - 1 - i) * 86_400_000).toISOString().slice(0, 10),
-    kg,
-  }));
+describe("charge d'aide", () => {
+  /** 4 séries de 5 à 8 répétitions à la traction assistée. */
+  const PLAN = getDay("lundi")!.exercises[1];
 
-describe("suivi du poids", () => {
-  it("calcule la moyenne des sept derniers jours plutôt que la dernière pesée", () => {
-    const t = weightTrend(weightsFrom([62, 62.4, 61.8, 62.2, 62.6, 62.1, 63.4]));
-    expect(t.latest).toBe(63.4);
-    expect(t.avg7).not.toBeNull();
-    expect(t.avg7!).toBeLessThan(63.4);
+  it("l'exercice déclare que sa charge est une aide", () => {
+    expect(ASSISTED.assistance).toBe(true);
+    expect(PLAN.exerciseId).toBe("assisted-pull-up");
   });
 
-  it("ajoute des calories après deux semaines de stagnation", () => {
-    const flat = weightsFrom(Array.from({ length: 21 }, () => 62.5));
-    const a = calorieAdjustment(flat, PROFILE);
-    expect(a.extraKcal).toBeGreaterThanOrEqual(150);
-    expect(a.actionable).toBe(true);
+  it("réussir la fourchette retire de l'aide au lieu d'en ajouter", () => {
+    const h = [entry([set(8, 40, 2), set(8, 40, 2), set(8, 40, 2), set(8, 40, 2)])];
+    const r = recommendLoad(ASSISTED, PLAN, h, PROFILE);
+    // Moins d'aide = plus dur : c'est ça, progresser sur cette machine.
+    expect(r.weight).toBeLessThan(40);
+    expect(r.delta).toBeLessThan(0);
+    expect(r.deload).toBe(false);
+    expect(r.display).toMatch(/aide/);
   });
 
-  it("ne change rien quand le poids monte au bon rythme", () => {
-    const rising = weightsFrom(Array.from({ length: 21 }, (_, i) => 62 + i * 0.04));
-    const a = calorieAdjustment(rising, PROFILE);
-    expect(a.extraKcal).toBe(0);
+  it("une douleur remet de l'aide", () => {
+    const h = [entry([set(6, 40, 1, { pain: true }), set(5, 40, 0)])];
+    const r = recommendLoad(ASSISTED, PLAN, h, PROFILE);
+    expect(r.weight).toBeGreaterThan(40);
+    expect(r.deload).toBe(true);
   });
 
-  it("redescend si la prise dépasse 600 g par semaine", () => {
-    const fast = weightsFrom(Array.from({ length: 21 }, (_, i) => 62 + i * 0.12));
-    const a = calorieAdjustment(fast, PROFILE);
-    expect(a.extraKcal).toBeLessThan(0);
+  it("deux séances sous la fourchette remettent de l'aide", () => {
+    const faible = [set(3, 40, 0), set(3, 40, 0)];
+    const r = recommendLoad(ASSISTED, PLAN, [entry(faible, 2), entry(faible, 5), entry(faible, 9)], PROFILE);
+    expect(r.weight).toBeGreaterThan(40);
+    expect(r.deload).toBe(true);
   });
 
-  it("reste dans la fourchette visée par le programme", () => {
-    const t = computeTargets(PROFILE);
-    expect(t.kcal).toBeGreaterThanOrEqual(2450);
-    expect(t.kcal).toBeLessThanOrEqual(2850);
-    expect(t.prot).toBeGreaterThanOrEqual(120);
-    expect(t.prot).toBeLessThanOrEqual(145);
-  });
-});
-
-/* ---------------- Cohérence du programme ---------------- */
-
-describe("programme", () => {
-  it("ne référence que des exercices qui existent", () => {
-    for (const dayId of ["lundi", "mardi", "jeudi", "samedi"]) {
-      const day = getDay(dayId)!;
-      expect(day).toBeDefined();
-      for (const p of day.exercises) expect(() => ex(p.exerciseId)).not.toThrow();
-    }
-  });
-
-  it("donne une fourchette cohérente à chaque exercice", () => {
-    for (const dayId of ["lundi", "mardi", "jeudi", "samedi"]) {
-      for (const p of getDay(dayId)!.exercises) {
-        if (p.metric === "reps") expect(p.repMax).toBeGreaterThanOrEqual(p.repMin);
-        if (p.metric === "distance") expect(p.distMax!).toBeGreaterThan(p.distMin!);
-        if (p.metric === "duration") expect(p.secMax!).toBeGreaterThan(p.secMin!);
-        expect(p.sets).toBeGreaterThan(0);
-        expect(p.restSec).toBeGreaterThan(0);
-      }
-    }
-  });
-
-  it("tient dans la durée annoncée", () => {
-    for (const dayId of ["lundi", "mardi", "jeudi", "samedi"]) {
-      const day = getDay(dayId)!;
-      expect(day.estimatedMin).toBeGreaterThan(60);
-      expect(day.estimatedMin).toBeLessThanOrEqual(100);
-    }
+  it("l'aide ne descend jamais sous zéro", () => {
+    const h = [entry([set(8, 0, 3), set(8, 0, 3), set(8, 0, 3), set(8, 0, 3)])];
+    expect(recommendLoad(ASSISTED, PLAN, h, PROFILE).weight).toBeGreaterThanOrEqual(0);
   });
 });

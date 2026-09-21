@@ -93,6 +93,11 @@ export type Exercise = {
   primary: MuscleId[];
   secondary: MuscleId[];
   loadModel: LoadModel;
+  /**
+   * La charge réglée est une aide, pas une résistance : plus elle est élevée,
+   * plus l'exercice est facile. Progresser, c'est donc en retirer.
+   */
+  assistance?: boolean;
   increment: number;
   unilateral?: boolean;
   /** difficulté technique 1-5 : conditionne la prudence des estimations */

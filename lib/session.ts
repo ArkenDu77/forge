@@ -1,4 +1,4 @@
-import { ALL_DAYS, WEEKDAY_LABELS } from "@/lib/data/program";
+import { adaptForWeek, ALL_DAYS, WEEKDAY_LABELS } from "@/lib/data/program";
 import type { WorkoutDay, WorkoutSession } from "@/lib/types";
 
 /** 0 = lundi */
@@ -6,21 +6,29 @@ export function todayIndex(d = new Date()) {
   return (d.getDay() + 6) % 7;
 }
 
+/**
+ * Les séances rendues à l'écran sont toujours allégées pour la semaine en cours :
+ * afficher le jour brut ici et le jour allégé ailleurs donnait deux durées et
+ * deux nombres de séries pour la même séance.
+ */
+const forWeek = (day: WorkoutDay, week: number) => adaptForWeek(day, week);
+
 /** La séance prévue aujourd'hui, ou null si c'est un jour de repos. */
-export function dayForToday(d = new Date()): WorkoutDay | null {
+export function dayForToday(week = 99, d = new Date()): WorkoutDay | null {
   const wd = todayIndex(d);
-  return ALL_DAYS.find((x) => x.weekday === wd) ?? null;
+  const day = ALL_DAYS.find((x) => x.weekday === wd);
+  return day ? forWeek(day, week) : null;
 }
 
 /** La prochaine séance du calendrier, avec le nombre de jours qui la sépare d'aujourd'hui. */
-export function upcomingDay(d = new Date()): { day: WorkoutDay; inDays: number } {
+export function upcomingDay(week = 99, d = new Date()): { day: WorkoutDay; inDays: number } {
   const wd = todayIndex(d);
   for (let offset = 0; offset < 8; offset++) {
     const target = (wd + offset) % 7;
     const day = ALL_DAYS.find((x) => x.weekday === target);
-    if (day) return { day, inDays: offset };
+    if (day) return { day: forWeek(day, week), inDays: offset };
   }
-  return { day: ALL_DAYS[0], inDays: 0 };
+  return { day: forWeek(ALL_DAYS[0], week), inDays: 0 };
 }
 
 export function weekdayLabel(weekday: number) {

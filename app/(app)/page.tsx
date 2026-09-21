@@ -33,9 +33,9 @@ export default function Dashboard() {
   const [weighOpen, setWeighOpen] = useState(false);
   const [draftWeight, setDraftWeight] = useState<number | null>(null);
 
-  const todayDay = dayForToday();
-  const upcoming = upcomingDay();
   const week = weeksSince(profile.createdAt) + 1;
+  const todayDay = dayForToday(week);
+  const upcoming = upcomingDay(week);
   const adaptation = adaptationLabel(week);
   const doneWeek = doneThisWeek(sessions).length;
 

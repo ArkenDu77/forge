@@ -38,6 +38,7 @@ export type LoadRecommendation = {
 };
 
 function displayWeight(exercise: Exercise, weight: number) {
+  if (exercise.assistance) return `${weight} kg d'aide`;
   if (exercise.loadModel === "bodyweight") return "Poids du corps";
   if (exercise.loadModel === "bodyweight-loaded") return weight > 0 ? `Poids du corps + ${weight} kg` : "Poids du corps";
   if (exercise.loadModel === "dumbbell-pair") return `2 × ${weight} kg`;
@@ -106,13 +107,17 @@ export function recommendLoad(
   const meanRir = topSets.reduce((a, s) => a + s.rir, 0) / topSets.length;
   const hadPain = last.sets.some((s) => s.pain);
   const inc = exercise.increment || 2.5;
+  // Sens de la progression : sur une machine assistée, on avance en retirant
+  // de l'aide, et on recule en en remettant.
+  const harder = exercise.assistance ? -1 : 1;
+  const easier = -harder;
   const reasons: Reason[] = [];
 
   const repsSummary = reps.join(" / ");
   reasons.push({ ok: true, text: `Dernière séance : ${displayWeight(exercise, prev)} — ${repsSummary} reps` });
 
   if (hadPain) {
-    const weight = roundTo(Math.max(inc, prev * 0.85), inc);
+    const weight = roundTo(Math.max(0, prev + easier * Math.max(inc, prev * 0.15)), inc);
     return {
       weight,
       previousWeight: prev,
@@ -134,19 +139,26 @@ export function recommendLoad(
     const stalledLong = history.length >= 2 && workingWeight(history[1].sets) === prev;
     const bigJump = meanRir >= 3 && exercise.loadModel !== "dumbbell-pair" && exercise.pattern !== "isolation";
     const step = bigJump ? inc * 2 : inc;
-    const weight = roundTo(prev + step, inc);
+    const weight = Math.max(0, roundTo(prev + harder * step, inc));
     reasons.push({ ok: true, text: `Haut de la fourchette atteint sur toutes les séries (${target.repMax} reps)` });
     reasons.push({
       ok: true,
       text: meanRir >= 2 ? "Difficulté maîtrisée : il te restait de la réserve" : "Réserve suffisante en fin de série",
     });
     if (stalledLong) reasons.push({ ok: true, text: "Deuxième séance consécutive réussie à cette charge" });
-    reasons.push({ ok: true, text: `Progression : +${step} kg${exercise.loadModel === "dumbbell-pair" ? " par haltère" : ""}` });
+    reasons.push({
+      ok: true,
+      text: exercise.assistance
+        ? `Progression : ${step} kg d'aide en moins, donc un peu plus de toi`
+        : `Progression : +${step} kg${exercise.loadModel === "dumbbell-pair" ? " par haltère" : ""}`,
+    });
     return {
       weight,
       previousWeight: prev,
-      delta: step,
-      headline: `On monte à ${displayWeight(exercise, weight)}`,
+      delta: weight - prev,
+      headline: exercise.assistance
+        ? `On descend à ${displayWeight(exercise, weight)} : tu en fais plus toi-même`
+        : `On monte à ${displayWeight(exercise, weight)}`,
       source: "historique",
       deload: false,
       display: displayWeight(exercise, weight),
@@ -179,7 +191,7 @@ export function recommendLoad(
   }).length;
 
   if (stalls >= 2) {
-    const weight = roundTo(Math.max(inc, prev * 0.9), inc);
+    const weight = roundTo(Math.max(0, prev + easier * Math.max(inc, prev * 0.1)), inc);
     reasons.push({ ok: false, text: `Sous la fourchette sur ${stalls} séances à cette charge` });
     reasons.push({ ok: true, text: "Léger recul de charge pour repartir sur des séries propres" });
     return {
