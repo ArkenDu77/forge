@@ -104,6 +104,14 @@ export default function ProgressionPage() {
         <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
           <SectionTitle>Exercice par exercice</SectionTitle>
           <div className="mb-6 space-y-2">
+            {/* Une courbe a besoin de deux points : tant qu'un exercice n'a pas
+                été fait deux fois, on l'explique au lieu de laisser un vide. */}
+            {trained.length === 0 && (
+              <InfoNote>
+                Il faut avoir fait un exercice deux fois pour voir sa courbe. Refais la même séance la semaine
+                prochaine et elle apparaîtra ici.
+              </InfoNote>
+            )}
             {trained.slice(0, 8).map(({ e, h, prog }) => (
               <Link key={e.id} href={`/progression/${e.id}`} className="tap block">
                 <Card className="flex items-center gap-3 p-4">
@@ -127,6 +135,12 @@ export default function ProgressionPage() {
 
           <SectionTitle>Tes meilleurs résultats</SectionTitle>
           <div className="space-y-2">
+            {allPrs.length === 0 && (
+              <InfoNote>
+                Un meilleur résultat s&apos;enregistre quand tu dépasses ce que tu avais déjà fait sur un exercice.
+                Ta première séance sert de point de départ.
+              </InfoNote>
+            )}
             {allPrs.slice(0, 6).map((pr, i) => (
               <Card key={i} className="flex items-center gap-3 p-3.5">
                 <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-ember-500/12 text-ember-300">

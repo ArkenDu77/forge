@@ -15,7 +15,16 @@ const i = (
  * fait partie du repas, ce ne sont pas des options entre lesquelles choisir.
  * Les dîners sont interchangeables : même apport, plats différents.
  */
-export const RECIPES: Recipe[] = [
+/**
+ * Le coût d'une portion se déduit du prix des ingrédients : le recopier à la
+ * main à côté d'eux revenait à maintenir deux fois le même chiffre.
+ */
+const priced = (r: Omit<Recipe, "costPerServing">): Recipe => ({
+  ...r,
+  costPerServing: Math.round(r.ingredients.reduce((a, x) => a + x.qty * x.pricePerUnit, 0) * 100) / 100,
+});
+
+const RAW_RECIPES: Omit<Recipe, "costPerServing">[] = [
   /* ---------------- Petit-déjeuner ---------------- */
   {
     id: "mass-smoothie",
@@ -24,13 +33,12 @@ export const RECIPES: Recipe[] = [
     slot: ["petit-dejeuner"],
     minutes: 5,
     servings: 1,
-    macros: { kcal: 730, prot: 46, carbs: 90, fat: 21 },
-    costPerServing: 1.95,
+    macros: { kcal: 768, prot: 47, carbs: 97, fat: 22 },
     tags: ["rapide", "tres-proteine", "hypercalorique", "vegetarien"],
     emoji: "🥤",
     gradient: ["#c58cff", "#6b3fb0"],
     ingredients: [
-      i("Flocons d'avoine", 70, "g", "epicerie", 0.0025),
+      i("Flocons d'avoine", 80, "g", "epicerie", 0.0025),
       i("Lait demi-écrémé", 300, "ml", "cremerie", 0.0012),
       i("Banane", 1, "u", "fruits-legumes", 0.28),
       i("Whey", 27, "g", "epicerie", 0.025),
@@ -56,14 +64,13 @@ export const RECIPES: Recipe[] = [
     slot: ["dejeuner"],
     minutes: 20,
     servings: 1,
-    macros: { kcal: 740, prot: 45, carbs: 82, fat: 20 },
-    costPerServing: 2.65,
+    macros: { kcal: 655, prot: 38, carbs: 75, fat: 19 },
     tags: ["tres-proteine", "meal-prep", "sans-lactose"],
     emoji: "🍛",
     gradient: ["#ffb347", "#d9622b"],
     ingredients: [
-      i("Blanc de poulet", 160, "g", "viande", 0.0105),
-      i("Riz basmati (cru)", 80, "g", "epicerie", 0.0022),
+      i("Blanc de poulet", 130, "g", "viande", 0.0105),
+      i("Riz basmati (cru)", 70, "g", "epicerie", 0.0022),
       i("Légumes surgelés", 200, "g", "surgele", 0.0035),
       i("Huile d'olive", 10, "ml", "epicerie", 0.009),
       i("Pomme", 1, "u", "fruits-legumes", 0.4),
@@ -88,7 +95,6 @@ export const RECIPES: Recipe[] = [
     minutes: 3,
     servings: 1,
     macros: { kcal: 600, prot: 36, carbs: 76, fat: 17 },
-    costPerServing: 2.1,
     tags: ["rapide", "tres-proteine", "vegetarien"],
     emoji: "🥣",
     gradient: ["#a4b8ff", "#6b7ce0"],
@@ -117,14 +123,13 @@ export const RECIPES: Recipe[] = [
     slot: ["diner"],
     minutes: 18,
     servings: 1,
-    macros: { kcal: 720, prot: 46, carbs: 90, fat: 18 },
-    costPerServing: 2.5,
+    macros: { kcal: 643, prot: 40, carbs: 83, fat: 17 },
     tags: ["rapide", "tres-proteine"],
     emoji: "🍝",
     gradient: ["#a8e063", "#4f9a45"],
     ingredients: [
-      i("Blanc de poulet", 150, "g", "viande", 0.0105),
-      i("Pâtes (crues)", 100, "g", "epicerie", 0.0018),
+      i("Blanc de poulet", 125, "g", "viande", 0.0105),
+      i("Pâtes (crues)", 90, "g", "epicerie", 0.0018),
       i("Sauce tomate", 150, "g", "epicerie", 0.003),
       i("Huile d'olive", 8, "ml", "epicerie", 0.009),
       i("Parmesan", 15, "g", "cremerie", 0.022),
@@ -145,14 +150,13 @@ export const RECIPES: Recipe[] = [
     slot: ["diner"],
     minutes: 20,
     servings: 1,
-    macros: { kcal: 700, prot: 42, carbs: 84, fat: 20 },
-    costPerServing: 3.1,
+    macros: { kcal: 619, prot: 37, carbs: 74, fat: 18 },
     tags: ["tres-proteine", "sans-lactose"],
     emoji: "🥩",
     gradient: ["#ff8f6b", "#c33d2e"],
     ingredients: [
-      i("Bœuf haché 5%", 150, "g", "viande", 0.012),
-      i("Riz basmati (cru)", 85, "g", "epicerie", 0.0022),
+      i("Bœuf haché 5%", 125, "g", "viande", 0.012),
+      i("Riz basmati (cru)", 72, "g", "epicerie", 0.0022),
       i("Haricots verts", 200, "g", "surgele", 0.0035),
       i("Huile d'olive", 8, "ml", "epicerie", 0.009),
       i("Sauce soja", 15, "ml", "epicerie", 0.006),
@@ -173,14 +177,13 @@ export const RECIPES: Recipe[] = [
     slot: ["diner"],
     minutes: 30,
     servings: 1,
-    macros: { kcal: 720, prot: 40, carbs: 70, fat: 28 },
-    costPerServing: 4.2,
+    macros: { kcal: 636, prot: 36, carbs: 60, fat: 25 },
     tags: ["tres-proteine", "sans-lactose"],
     emoji: "🐟",
     gradient: ["#ff9a8b", "#d2543f"],
     ingredients: [
-      i("Pavé de saumon", 150, "g", "poisson", 0.022),
-      i("Pommes de terre", 350, "g", "fruits-legumes", 0.0022),
+      i("Pavé de saumon", 130, "g", "poisson", 0.022),
+      i("Pommes de terre", 300, "g", "fruits-legumes", 0.0022),
       i("Brocoli", 150, "g", "fruits-legumes", 0.0032),
       i("Huile d'olive", 10, "ml", "epicerie", 0.009),
     ],
@@ -199,14 +202,13 @@ export const RECIPES: Recipe[] = [
     slot: ["diner", "petit-dejeuner"],
     minutes: 12,
     servings: 1,
-    macros: { kcal: 700, prot: 33, carbs: 60, fat: 36 },
-    costPerServing: 2.6,
+    macros: { kcal: 651, prot: 33, carbs: 48, fat: 36 },
     tags: ["rapide", "vegetarien", "sans-lactose"],
     emoji: "🍳",
     gradient: ["#ffd479", "#e0913a"],
     ingredients: [
       i("Œufs", 4, "u", "cremerie", 0.32),
-      i("Pain complet", 100, "g", "boulangerie", 0.005),
+      i("Pain complet", 80, "g", "boulangerie", 0.005),
       i("Avocat", 0.5, "u", "fruits-legumes", 1.2),
       i("Huile d'olive", 5, "ml", "epicerie", 0.009),
     ],
@@ -225,13 +227,12 @@ export const RECIPES: Recipe[] = [
     slot: ["diner"],
     minutes: 12,
     servings: 1,
-    macros: { kcal: 690, prot: 40, carbs: 96, fat: 14 },
-    costPerServing: 1.8,
+    macros: { kcal: 637, prot: 40, carbs: 83, fat: 14 },
     tags: ["rapide", "pas-cher", "sans-lactose", "tres-proteine"],
     emoji: "🥫",
     gradient: ["#7fd4e8", "#2d7f96"],
     ingredients: [
-      i("Pâtes (crues)", 110, "g", "epicerie", 0.0018),
+      i("Pâtes (crues)", 95, "g", "epicerie", 0.0018),
       i("Thon au naturel", 1, "u", "epicerie", 1.25),
       i("Sauce tomate", 150, "g", "epicerie", 0.003),
       i("Huile d'olive", 8, "ml", "epicerie", 0.009),
@@ -253,7 +254,6 @@ export const RECIPES: Recipe[] = [
     minutes: 3,
     servings: 1,
     macros: { kcal: 380, prot: 14, carbs: 52, fat: 13 },
-    costPerServing: 1.1,
     tags: ["rapide", "hypercalorique", "vegetarien", "pas-cher"],
     emoji: "🥛",
     gradient: ["#b9e5ff", "#4a8fb5"],
@@ -274,7 +274,6 @@ export const RECIPES: Recipe[] = [
     minutes: 3,
     servings: 1,
     macros: { kcal: 420, prot: 14, carbs: 46, fat: 20 },
-    costPerServing: 0.75,
     tags: ["rapide", "pas-cher", "vegetarien", "hypercalorique"],
     emoji: "🍞",
     gradient: ["#ffd08a", "#d18b3a"],
@@ -287,6 +286,8 @@ export const RECIPES: Recipe[] = [
     storage: "À manger tout de suite.",
   },
 ];
+
+export const RECIPES: Recipe[] = RAW_RECIPES.map(priced);
 
 /** Repas fixes de la journée : on ne choisit pas entre les ingrédients, on mange tout. */
 export const FIXED_MEALS: Record<string, string> = {

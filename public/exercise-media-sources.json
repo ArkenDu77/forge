@@ -8,7 +8,7 @@
     "La recoloration est faite à l'affichage : les fichiers distribués ne sont pas modifiés."
   ],
   "customDrawn": {
-    "reason": "Absents du catalogue Commons — dessinés par le moteur maison, aucune licence tierce.",
+    "reason": "Absents du catalogue Commons — dessinés par le moteur maison, aucune licence tierce. Tout exercice de la librairie qui n'apparaît pas dans « assets » est dans le même cas : sa démonstration est générée par le moteur d'animation du projet, à partir de données de pose, et n'emprunte aucun média extérieur.",
     "exercises": [
       "chest-supported-row",
       "lateral-raise",
