@@ -3,52 +3,47 @@
 import { motion } from "motion/react";
 import { useMemo, useState } from "react";
 import { Page, TopBar } from "@/components/AppShell";
-import { ExerciseFigure } from "@/components/exercise/Figure";
+import { ExerciseMedia } from "@/components/exercise/ExerciseMedia";
 import { Icon } from "@/components/ui/Icon";
-import { Card, Chip, cx, InfoNote, SectionTitle, Segmented, Sheet } from "@/components/ui/primitives";
-import { ProgressBar } from "@/components/ui/progress";
+import { Button, Card, Chip, cx, InfoNote, Sheet } from "@/components/ui/primitives";
 import { EXERCISES, ex } from "@/lib/data/exercises";
+import { coachingFor } from "@/lib/data/coaching";
 import { useApp } from "@/lib/store";
-import { adjustFromFeedback, estimate1RM, estimateStartingLoad, loadForReps, strengthLevel, type Feedback } from "@/lib/estimator";
+import { adjustFromFeedback, estimateStartingLoad, loadForReps, estimate1RM, type Feedback } from "@/lib/estimator";
 import { SAFETY } from "@/lib/copy";
-import { kg } from "@/lib/format";
-import type { Level } from "@/lib/types";
+import { nf } from "@/lib/format";
 
-const MAIN = ["bench-press", "squat", "rdl", "overhead-press", "lat-pulldown", "leg-press", "incline-db-press", "hip-thrust"];
+const SUGGESTED = ["bench-press", "hack-squat", "rdl", "lat-pulldown", "leg-press", "db-shoulder-press"];
 
-export default function SimulateurPage() {
+export default function QuelPoidsPage() {
   const profile = useApp((s) => s.profile)!;
   const [exerciseId, setExerciseId] = useState("bench-press");
-  const [mode, setMode] = useState<"depart" | "1rm">("depart");
-  const [level, setLevel] = useState<Level>(profile.level);
-  const [experienced, setExperienced] = useState(false);
-  const [knownWeight, setKnownWeight] = useState(40);
-  const [knownReps, setKnownReps] = useState(8);
-  const [knownRir, setKnownRir] = useState(2);
+  const [known, setKnown] = useState(false);
+  const [lastWeight, setLastWeight] = useState(30);
+  const [lastReps, setLastReps] = useState(8);
   const [feedback, setFeedback] = useState<Feedback | null>(null);
   const [pickerOpen, setPickerOpen] = useState(false);
 
   const exercise = ex(exerciseId);
-  const base = useMemo(
-    () => estimateStartingLoad(exercise, { ...profile, level }),
-    [exercise, profile, level]
-  );
+  const base = useMemo(() => estimateStartingLoad(exercise, profile), [exercise, profile]);
 
-  const oneRm = estimate1RM(knownWeight, knownReps, knownRir);
-  const level5 = strengthLevel(exerciseId, oneRm, profile.weightKg, profile.sex);
-  const adjusted = feedback ? adjustFromFeedback(base.weight, feedback, exercise.increment) : null;
-  const recommended = experienced ? Math.round(loadForReps(oneRm, 8) / exercise.increment) * exercise.increment : base.weight;
+  // Si la personne connaît une performance récente, on s'en sert : c'est plus fiable
+  // que n'importe quelle estimation à partir du poids de corps.
+  const fromKnown = Math.round(loadForReps(estimate1RM(lastWeight, lastReps), 8) / exercise.increment) * exercise.increment;
+  const suggested = known ? fromKnown : base.weight;
+  const adjusted = feedback ? adjustFromFeedback(suggested, feedback, exercise.increment) : null;
+  const finalWeight = adjusted ? adjusted.weight : suggested;
 
   return (
     <Page>
-      <TopBar title="Simulateur" subtitle="Estimer un point de départ prudent" back="/programme" />
+      <TopBar title="Quel poids mettre ?" subtitle="Une estimation prudente, à ajuster dès la première série" back="/programme" />
 
       <button
         onClick={() => setPickerOpen(true)}
         className="tap mb-4 flex w-full items-center gap-3 rounded-3xl border border-white/10 bg-white/[.03] p-3 text-left"
       >
         <div className="h-16 w-20 shrink-0 overflow-hidden rounded-2xl bg-white/[.03]">
-          <ExerciseFigure media={exercise.media} className="h-full w-full" showTrail={false} frame={0.5} />
+          <ExerciseMedia exercise={exercise} className="h-full w-full" frame={0.5} />
         </div>
         <div className="min-w-0 flex-1">
           <p className="text-[11px] uppercase tracking-wider text-chalk-mute">Exercice</p>
@@ -57,179 +52,117 @@ export default function SimulateurPage() {
         <Icon name="down" size={17} className="text-chalk-mute" />
       </button>
 
-      <Segmented
-        className="mb-4"
-        value={mode}
-        onChange={setMode}
-        options={[
-          { value: "depart", label: "Charge de départ" },
-          { value: "1rm", label: "1RM estimé" },
-        ]}
-      />
-
-      {mode === "depart" ? (
-        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
-          <Card className="mb-4 p-5">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-chalk-mute">Ton niveau sur cet exercice</p>
-            <div className="mt-3 grid grid-cols-2 gap-2">
-              {(
-                [
-                  ["jamais", "Jamais fait"],
-                  ["debutant", "Débutant"],
-                  ["intermediaire", "Intermédiaire"],
-                  ["avance", "Avancé"],
-                ] as [Level, string][]
-              ).map(([v, l]) => (
-                <button
-                  key={v}
-                  onClick={() => setLevel(v)}
-                  className={cx(
-                    "tap rounded-2xl border py-3 text-[13px] font-semibold transition active:scale-95",
-                    level === v ? "border-ember-500/60 bg-ember-500/[.10] text-ember-300" : "border-white/10 bg-white/[.03] text-chalk-dim"
-                  )}
-                >
-                  {l}
-                </button>
-              ))}
-            </div>
+      <Card className="mb-4 p-5">
+        <p className="text-[15px] font-semibold">Tu as déjà fait cet exercice ?</p>
+        <div className="mt-3 grid grid-cols-2 gap-2">
+          {[
+            { v: false, label: "Jamais" },
+            { v: true, label: "Oui, je me souviens" },
+          ].map((o) => (
             <button
-              onClick={() => setExperienced((e) => !e)}
+              key={String(o.v)}
+              onClick={() => {
+                setKnown(o.v);
+                setFeedback(null);
+              }}
               className={cx(
-                "tap mt-3 flex w-full items-center gap-2.5 rounded-2xl border px-3.5 py-3 text-left text-[13px]",
-                experienced ? "border-ember-500/40 bg-ember-500/[.08] text-ember-300" : "border-white/8 bg-white/[.02] text-chalk-dim"
+                "tap rounded-2xl border py-3.5 text-[13.5px] font-semibold transition active:scale-95",
+                known === o.v ? "border-ember-500/60 bg-ember-500/[.10] text-ember-300" : "border-white/10 bg-white/[.03] text-chalk-dim"
               )}
             >
-              <Icon name={experienced ? "check" : "plus"} size={15} />
-              J&apos;ai déjà une performance connue sur cet exercice
+              {o.label}
             </button>
-          </Card>
+          ))}
+        </div>
 
-          {experienced && (
-            <Card className="mb-4 space-y-4 p-5">
-              <Slider label="Dernière charge" value={knownWeight} onChange={setKnownWeight} min={0} max={220} step={exercise.increment} unit="kg" />
-              <Slider label="Répétitions réalisées" value={knownReps} onChange={setKnownReps} min={1} max={20} step={1} unit="reps" />
-              <Slider label="Répétitions en réserve" value={knownRir} onChange={setKnownRir} min={0} max={5} step={1} unit="RIR" />
-            </Card>
+        {known && (
+          <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="mt-4 space-y-4 overflow-hidden">
+            <Slider label="Le poids que tu avais mis" value={lastWeight} onChange={setLastWeight} min={0} max={200} step={exercise.increment} unit="kg" />
+            <Slider label="Le nombre de répétitions réussies" value={lastReps} onChange={setLastReps} min={1} max={20} step={1} unit="" />
+          </motion.div>
+        )}
+      </Card>
+
+      <Card className="mb-4 overflow-hidden p-0">
+        <div className="bg-gradient-to-br from-ember-500/15 to-transparent p-5">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-ember-300">{SAFETY.estimateLabel}</p>
+          <p className="mt-2 font-display text-[42px] font-extrabold leading-none">
+            {base.bodyweightOnly ? "—" : nf(finalWeight, finalWeight % 1 === 0 ? 0 : 1)}
+            {!base.bodyweightOnly && <span className="ml-1.5 text-lg font-semibold text-chalk-dim">kg</span>}
+          </p>
+          <p className="mt-1.5 text-[13.5px] text-chalk-dim">
+            {base.bodyweightOnly ? base.display : "Pour une série d'environ 8 répétitions confortables"}
+          </p>
+        </div>
+        <div className="space-y-2 p-5">
+          {base.notes.map((n) => (
+            <p key={n} className="flex gap-2 text-[12.5px] text-chalk-mute">
+              <Icon name="info" size={14} className="mt-0.5 shrink-0" />
+              {n}
+            </p>
+          ))}
+          {adjusted && (
+            <p className="rounded-2xl border border-ember-500/25 bg-ember-500/[.07] px-3.5 py-3 text-[13px] text-ember-300/90">
+              {adjusted.message}
+            </p>
           )}
+        </div>
+      </Card>
 
-          <Card className="mb-4 overflow-hidden p-0">
-            <div className="bg-gradient-to-br from-ember-500/15 to-transparent p-5">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-ember-300">{SAFETY.estimateLabel}</p>
-              <p className="mt-2 font-display text-[40px] font-extrabold leading-none">
-                {adjusted ? adjusted.weight : recommended}
-                <span className="ml-1.5 text-lg font-semibold text-chalk-dim">kg</span>
-              </p>
-              <p className="mt-1.5 text-[13.5px] text-chalk-dim">
-                {base.bodyweightOnly ? base.display : `Pour une série de 8 répétitions confortables`}
-              </p>
-            </div>
-            <div className="space-y-2 p-5">
-              {base.notes.map((n) => (
-                <p key={n} className="flex gap-2 text-[12.5px] text-chalk-mute">
-                  <Icon name="info" size={14} className="mt-0.5 shrink-0" />
-                  {n}
-                </p>
-              ))}
-              {adjusted && (
-                <p className="rounded-2xl border border-ember-500/25 bg-ember-500/[.07] px-3.5 py-3 text-[13px] text-ember-300/90">
-                  {adjusted.message}
-                </p>
-              )}
-            </div>
-          </Card>
+      <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-chalk-mute">
+        Fais une série d&apos;essai, puis dis-moi
+      </p>
+      <div className="mb-4 grid grid-cols-2 gap-2">
+        {(
+          [
+            ["trop-facile", "C'était trop facile", "arrowUp"],
+            ["correcte", "C'était bien", "check"],
+            ["trop-lourde", "C'était trop lourd", "arrowDown"],
+            ["douleur", "J'ai eu mal", "alert"],
+          ] as [Feedback, string, string][]
+        ).map(([v, l, i]) => (
+          <button
+            key={v}
+            onClick={() => setFeedback(v)}
+            className={cx(
+              "tap flex items-center gap-2.5 rounded-2xl border px-4 py-3.5 text-[13.5px] font-semibold transition active:scale-95",
+              feedback === v
+                ? v === "douleur"
+                  ? "border-danger/50 bg-danger/10 text-danger"
+                  : "border-ember-500/60 bg-ember-500/[.10] text-ember-300"
+                : "border-white/10 bg-white/[.03] text-chalk-dim"
+            )}
+          >
+            <Icon name={i} size={16} />
+            {l}
+          </button>
+        ))}
+      </div>
 
-          <SectionTitle>Après ta première série d&apos;essai</SectionTitle>
-          <div className="mb-4 grid grid-cols-2 gap-2">
-            {(
-              [
-                ["trop-facile", "Trop facile", "arrowUp"],
-                ["correcte", "Correcte", "check"],
-                ["trop-lourde", "Trop lourde", "arrowDown"],
-                ["douleur", "Douleur", "alert"],
-              ] as [Feedback, string, string][]
-            ).map(([v, l, i]) => (
-              <button
-                key={v}
-                onClick={() => setFeedback(v)}
-                className={cx(
-                  "tap flex items-center gap-2.5 rounded-2xl border px-4 py-3.5 text-[13.5px] font-semibold transition active:scale-95",
-                  feedback === v
-                    ? v === "douleur"
-                      ? "border-danger/50 bg-danger/10 text-danger"
-                      : "border-ember-500/60 bg-ember-500/[.10] text-ember-300"
-                    : "border-white/10 bg-white/[.03] text-chalk-dim"
-                )}
-              >
-                <Icon name={i} size={16} />
-                {l}
-              </button>
-            ))}
-          </div>
+      <Card className="mb-4 p-5">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-chalk-mute">Comment reconnaître la machine</p>
+        <ul className="mt-2 space-y-2">
+          {coachingFor(exercise.id).findIt.map((f) => (
+            <li key={f} className="flex gap-2.5 text-[13.5px] leading-relaxed text-chalk-dim">
+              <Icon name="check" size={14} className="mt-1 shrink-0 text-volt-400" />
+              {f}
+            </li>
+          ))}
+        </ul>
+      </Card>
 
-          <InfoNote tone="warn">{SAFETY.estimateDisclaimer}</InfoNote>
-        </motion.div>
-      ) : (
-        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
-          <Card className="mb-4 space-y-4 p-5">
-            <Slider label="Charge soulevée" value={knownWeight} onChange={setKnownWeight} min={0} max={250} step={exercise.increment} unit="kg" />
-            <Slider label="Répétitions" value={knownReps} onChange={setKnownReps} min={1} max={15} step={1} unit="reps" />
-            <Slider label="Répétitions en réserve" value={knownRir} onChange={setKnownRir} min={0} max={5} step={1} unit="RIR" />
-          </Card>
-
-          <Card className="mb-4 p-5 text-center">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-chalk-mute">1RM estimé</p>
-            <p className="mt-2 font-display text-[44px] font-extrabold leading-none text-gradient-ember">
-              {Math.round(oneRm)}
-              <span className="ml-1.5 text-lg font-semibold text-chalk-dim">kg</span>
-            </p>
-            <p className="mt-2 text-[12.5px] text-chalk-mute">
-              Formule d&apos;Epley — fiable jusqu&apos;à environ 10 répétitions. Ce n&apos;est pas une valeur à tester
-              systématiquement.
-            </p>
-          </Card>
-
-          <Card className="mb-4 p-5">
-            <div className="flex items-baseline justify-between">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-chalk-mute">Niveau de force</p>
-              <span className="text-[13px] font-bold text-ember-300">{level5.label}</span>
-            </div>
-            <ProgressBar value={(level5.index + level5.progress) / 5} className="mt-2.5" />
-            <div className="mt-2 flex justify-between text-[10.5px] text-chalk-mute">
-              {["Débutant", "Novice", "Intermédiaire", "Confirmé", "Avancé"].map((l) => (
-                <span key={l}>{l.slice(0, 4)}</span>
-              ))}
-            </div>
-            <p className="mt-3 text-[12.5px] text-chalk-mute">
-              {level5.ratio.toFixed(2).replace(".", ",")} × ton poids de corps ({profile.weightKg} kg).
-            </p>
-          </Card>
-
-          <SectionTitle>Charges de travail correspondantes</SectionTitle>
-          <Card className="divide-y divide-white/[.05] p-0">
-            {[3, 5, 8, 10, 12, 15].map((r) => (
-              <div key={r} className="flex items-center justify-between px-4 py-3">
-                <span className="num text-[13px] text-chalk-dim">{r} répétitions</span>
-                <span className="num text-[14px] font-semibold">
-                  {kg(Math.round(loadForReps(oneRm, r) / exercise.increment) * exercise.increment)}
-                </span>
-              </div>
-            ))}
-          </Card>
-          <div className="mt-4">
-            <InfoNote tone="warn">{SAFETY.loadNeverSafe}</InfoNote>
-          </div>
-        </motion.div>
-      )}
+      <InfoNote tone="warn">{SAFETY.estimateDisclaimer}</InfoNote>
 
       <Sheet open={pickerOpen} onClose={() => setPickerOpen(false)} title="Choisir un exercice">
         <div className="pb-4">
           <div className="mb-3 flex flex-wrap gap-2">
-            {MAIN.map((id) => (
+            {SUGGESTED.map((id) => (
               <Chip
                 key={id}
                 active={exerciseId === id}
                 onClick={() => {
                   setExerciseId(id);
+                  setFeedback(null);
                   setPickerOpen(false);
                 }}
               >
@@ -243,6 +176,7 @@ export default function SimulateurPage() {
                 key={e.id}
                 onClick={() => {
                   setExerciseId(e.id);
+                  setFeedback(null);
                   setPickerOpen(false);
                 }}
                 className={cx(
@@ -251,7 +185,7 @@ export default function SimulateurPage() {
                 )}
               >
                 <div className="h-14 w-full overflow-hidden rounded-xl">
-                  <ExerciseFigure media={e.media} className="h-full w-full" showTrail={false} frame={0.5} />
+                  <ExerciseMedia exercise={e} className="h-full w-full" frame={0.5} />
                 </div>
                 <p className="mt-1.5 truncate text-[12px] font-medium">{e.shortName ?? e.name}</p>
               </button>
@@ -283,10 +217,10 @@ function Slider({
   return (
     <div>
       <div className="flex items-baseline justify-between">
-        <span className="text-[12.5px] text-chalk-dim">{label}</span>
+        <span className="text-[13px] text-chalk-dim">{label}</span>
         <span className="num font-display text-lg font-bold">
-          {value}
-          <span className="ml-1 text-[11px] font-medium text-chalk-mute">{unit}</span>
+          {nf(value, value % 1 === 0 ? 0 : 1)}
+          {unit && <span className="ml-1 text-[11px] font-medium text-chalk-mute">{unit}</span>}
         </span>
       </div>
       <input

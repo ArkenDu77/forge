@@ -215,6 +215,9 @@ export type Profile = {
   targetWeightKg: number;
   sleepHours: number;
   dailyActivity: "sedentaire" | "leger" | "actif" | "tres-actif";
+  /** point de départ, pour pouvoir mesurer le chemin parcouru */
+  startPullUps: number;
+  startPushUps: number;
   createdAt: string;
 };
 

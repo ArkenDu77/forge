@@ -4,31 +4,42 @@ import { notFound } from "next/navigation";
 import { use, useMemo, useState } from "react";
 import { Page, TopBar } from "@/components/AppShell";
 import { LineChart } from "@/components/charts/Charts";
-import { ExerciseFigure } from "@/components/exercise/Figure";
-import { Button, Card, cx, EmptyState, Segmented, SectionTitle } from "@/components/ui/primitives";
-import { ProgressBar } from "@/components/ui/progress";
+import { ExerciseMedia } from "@/components/exercise/ExerciseMedia";
+import { Button, Card, cx, EmptyState, Segmented } from "@/components/ui/primitives";
 import { getExercise } from "@/lib/data/exercises";
+import { ALL_DAYS } from "@/lib/data/program";
 import { useApp } from "@/lib/store";
 import { historyFor, totalVolume, workingWeight } from "@/lib/progression";
-import { progressSinceStart } from "@/lib/coach";
-import { estimate1RM, strengthLevel } from "@/lib/estimator";
-import { frDate, kg, relativeDay } from "@/lib/format";
+import { frDate, nf, relativeDay } from "@/lib/format";
 
-type Metric = "1rm" | "charge" | "volume";
+type Metric = "poids" | "volume" | "resultat";
 
-export default function ExerciseHistoryPage({ params }: PageProps<"/progression/[exerciseId]"> ) {
+export default function ExerciseHistoryPage({ params }: PageProps<"/progression/[exerciseId]">) {
   const { exerciseId } = use(params);
   const exercise = getExercise(exerciseId);
   const sessions = useApp((s) => s.sessions);
-  const profile = useApp((s) => s.profile)!;
-  const [metric, setMetric] = useState<Metric>("1rm");
+  const [metric, setMetric] = useState<Metric>("poids");
 
   const history = useMemo(() => (exercise ? historyFor(sessions, exercise.id) : []), [sessions, exercise]);
   if (!exercise) notFound();
 
-  const prog = progressSinceStart(sessions, exercise.id);
-  const best = history.flatMap((h) => h.sets).reduce((b, s) => Math.max(b, estimate1RM(s.weight, s.reps)), 0);
-  const level = best > 0 ? strengthLevel(exercise.id, best, profile.weightKg, profile.sex) : null;
+  const plan = ALL_DAYS.flatMap((d) => d.exercises).find((p) => p.exerciseId === exercise.id);
+  const isCarry = plan?.metric === "distance";
+  const isHold = plan?.metric === "duration";
+  const unit = isCarry ? "m" : isHold ? "s" : "kg";
+
+  const bestOf = (sets: (typeof history)[number]["sets"]) =>
+    isCarry
+      ? Math.max(...sets.map((s) => s.distanceM ?? 0))
+      : isHold
+        ? Math.max(...sets.map((s) => s.seconds ?? 0))
+        : Math.max(...sets.map((s) => s.reps));
+
+  const first = history[history.length - 1];
+  const latest = history[0];
+  const startValue = first ? (isCarry || isHold ? bestOf(first.sets) : workingWeight(first.sets)) : 0;
+  const nowValue = latest ? (isCarry || isHold ? bestOf(latest.sets) : workingWeight(latest.sets)) : 0;
+  const gain = nowValue - startValue;
 
   const points = history
     .slice()
@@ -36,22 +47,24 @@ export default function ExerciseHistoryPage({ params }: PageProps<"/progression/
     .map((h) => ({
       label: frDate(h.date, { day: "numeric", month: "short" }),
       value:
-        metric === "1rm"
-          ? Math.round(Math.max(...h.sets.map((s) => estimate1RM(s.weight, s.reps))) * 10) / 10
-          : metric === "charge"
-            ? workingWeight(h.sets)
-            : Math.round(totalVolume(h.sets)),
+        metric === "volume"
+          ? Math.round(totalVolume(h.sets))
+          : metric === "resultat"
+            ? bestOf(h.sets)
+            : isCarry || isHold
+              ? bestOf(h.sets)
+              : workingWeight(h.sets),
     }));
 
   return (
     <Page>
-      <TopBar title={exercise.shortName ?? exercise.name} subtitle="Historique" back="/progression" />
+      <TopBar title={exercise.shortName ?? exercise.name} subtitle="Ce que tu as fait" back="/progression" />
 
       {history.length === 0 ? (
         <EmptyState
           icon="chart"
-          title="Aucune donnée"
-          body="Tu n'as pas encore enregistré de série sur cet exercice."
+          title="Rien à montrer encore"
+          body="Tu n'as pas encore fait cet exercice. Après ta première séance, tu verras ici l'évolution de tes poids."
           action={<Button href={`/exercice/${exercise.slug}`}>Voir la fiche</Button>}
         />
       ) : (
@@ -59,65 +72,75 @@ export default function ExerciseHistoryPage({ params }: PageProps<"/progression/
           <Card className="mb-4 overflow-hidden p-0">
             <div className="flex items-center gap-3 p-4">
               <div className="h-16 w-20 shrink-0 overflow-hidden rounded-xl bg-white/[.03]">
-                <ExerciseFigure media={exercise.media} className="h-full w-full" showTrail={false} frame={0.5} />
+                <ExerciseMedia exercise={exercise} className="h-full w-full" frame={0.5} />
               </div>
-              <div>
-                <p className="text-[11px] uppercase tracking-[0.14em] text-chalk-mute">Depuis le début</p>
-                <p className={cx("font-display text-2xl font-extrabold", (prog?.pct ?? 0) > 0 ? "text-gradient-ember" : "")}>
-                  {prog ? `${prog.pct > 0 ? "+" : ""}${prog.pct.toFixed(1).replace(".", ",")} %` : "—"}
+              <div className="flex-1">
+                <p className="text-[11px] uppercase tracking-[0.14em] text-chalk-mute">Depuis ta première séance</p>
+                <p className={cx("font-display text-2xl font-extrabold", gain > 0 && "text-gradient-ember")}>
+                  {gain > 0 ? "+" : ""}
+                  {nf(gain, gain % 1 === 0 ? 0 : 1)} {unit}
                 </p>
                 <p className="num text-[12px] text-chalk-mute">
-                  {prog ? `${Math.round(prog.from)} → ${Math.round(prog.to)} kg de 1RM estimé` : ""}
+                  {nf(startValue, 1)} {unit} → {nf(nowValue, 1)} {unit}
                 </p>
               </div>
             </div>
-            {level && (
-              <div className="border-t border-white/[.06] p-4">
-                <div className="flex items-baseline justify-between">
-                  <span className="text-[11px] uppercase tracking-[0.14em] text-chalk-mute">Niveau de force</span>
-                  <span className="text-[13px] font-bold text-ember-300">{level.label}</span>
-                </div>
-                <ProgressBar value={(level.index + level.progress) / 5} className="mt-2" />
-                <p className="mt-2 text-[11.5px] text-chalk-mute">
-                  {level.ratio.toFixed(2).replace(".", ",")} × ton poids de corps · prochain palier {level.nextLabel}
-                </p>
-              </div>
-            )}
           </Card>
 
           <Segmented
             className="mb-3"
             value={metric}
             onChange={setMetric}
-            options={[
-              { value: "1rm", label: "1RM estimé" },
-              { value: "charge", label: "Charge" },
-              { value: "volume", label: "Volume" },
-            ]}
+            options={
+              isCarry || isHold
+                ? [
+                    { value: "resultat", label: isCarry ? "Distance" : "Temps" },
+                    { value: "poids", label: "Poids porté" },
+                  ]
+                : [
+                    { value: "poids", label: "Poids" },
+                    { value: "resultat", label: "Répétitions" },
+                    { value: "volume", label: "Travail total" },
+                  ]
+            }
           />
           <Card className="mb-5 p-4">
             <LineChart
               points={points}
-              tone={metric === "1rm" ? "ember" : metric === "charge" ? "cyan" : "violet"}
-              format={(v) => (metric === "volume" ? `${Math.round(v)} kg` : kg(v))}
+              tone={metric === "poids" ? "ember" : metric === "resultat" ? "cyan" : "violet"}
+              format={(v) => `${nf(v, v % 1 === 0 ? 0 : 1)} ${metric === "volume" ? "kg au total" : unit}`}
             />
+            <p className="mt-2 text-center text-[11.5px] text-chalk-mute">
+              {metric === "volume"
+                ? "Tout le poids déplacé pendant la séance : poids × répétitions, additionné."
+                : metric === "poids"
+                  ? "Le poids de tes séries de travail, séance après séance."
+                  : isCarry
+                    ? "La distance la plus longue de chaque séance."
+                    : isHold
+                      ? "Le temps le plus long de chaque séance."
+                      : "Ton meilleur nombre de répétitions à chaque séance."}
+            </p>
           </Card>
 
-          <SectionTitle>Séances</SectionTitle>
+          <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-chalk-mute">Séance par séance</p>
           <div className="space-y-2">
             {history.map((h) => (
               <Card key={h.date} className="p-4">
                 <div className="mb-2 flex items-baseline justify-between">
                   <span className="text-[13px] font-semibold">{relativeDay(h.date.slice(0, 10))}</span>
                   <span className="num text-[11.5px] text-chalk-mute">
-                    1RM estimé {Math.round(Math.max(...h.sets.map((s) => estimate1RM(s.weight, s.reps))))} kg
+                    {h.sets.length} série{h.sets.length > 1 ? "s" : ""}
                   </span>
                 </div>
                 <div className="flex flex-wrap gap-1.5">
                   {h.sets.map((s, i) => (
                     <span key={i} className="num rounded-lg bg-white/[.05] px-2.5 py-1 text-[12px]">
-                      {s.weight} × {s.reps}
-                      <span className="ml-1 text-[10px] text-chalk-mute">RIR {s.rir}</span>
+                      {isCarry
+                        ? `${s.distanceM} m`
+                        : isHold
+                          ? `${s.seconds} s`
+                          : `${nf(s.weight, s.weight % 1 === 0 ? 0 : 1)} kg × ${s.reps}`}
                     </span>
                   ))}
                 </div>

@@ -79,7 +79,7 @@ export default function ProgressionPage() {
       <div className="mb-5 grid grid-cols-3 gap-2">
         {[
           { l: "Séances", v: done.length },
-          { l: "Records", v: allPrs.length },
+          { l: "Tes meilleurs résultats", v: allPrs.length },
           { l: "Volume", v: tons(totalVolume) },
         ].map((s) => (
           <Card key={s.l} className="p-4 text-center">
@@ -102,7 +102,7 @@ export default function ProgressionPage() {
 
       {tab === "force" && (
         <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
-          <SectionTitle>Progression par exercice</SectionTitle>
+          <SectionTitle>Exercice par exercice</SectionTitle>
           <div className="mb-6 space-y-2">
             {trained.slice(0, 8).map(({ e, h, prog }) => (
               <Link key={e.id} href={`/progression/${e.id}`} className="tap block">
@@ -110,7 +110,7 @@ export default function ProgressionPage() {
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-[14px] font-semibold">{e.shortName ?? e.name}</p>
                     <p className="num text-[12px] text-chalk-mute">
-                      {workingWeight(h[0].sets)} kg · 1RM estimé {Math.round(prog?.to ?? 0)} kg
+                      {workingWeight(h[0].sets)} kg aujourd&apos;hui
                     </p>
                   </div>
                   <Sparkline values={h.slice().reverse().map((x) => Math.max(...x.sets.map((s) => estimate1RM(s.weight, s.reps))))} />
@@ -125,7 +125,7 @@ export default function ProgressionPage() {
             ))}
           </div>
 
-          <SectionTitle>Records</SectionTitle>
+          <SectionTitle>Tes meilleurs résultats</SectionTitle>
           <div className="space-y-2">
             {allPrs.slice(0, 6).map((pr, i) => (
               <Card key={i} className="flex items-center gap-3 p-3.5">
@@ -137,7 +137,7 @@ export default function ProgressionPage() {
                   <p className="text-[11.5px] text-chalk-mute">{relativeDay(pr.date.slice(0, 10))}</p>
                 </div>
                 <span className="num text-[13px] font-bold text-ember-300">
-                  {pr.kind === "reps" ? `${pr.value} reps` : kg(pr.value)}
+                  {pr.kind === "reps" ? `${pr.value} répétitions` : kg(pr.value)}
                 </span>
               </Card>
             ))}

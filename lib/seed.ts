@@ -33,6 +33,8 @@ export const DEMO_PROFILE: Profile = {
   targetWeightKg: 68,
   sleepHours: 7.5,
   dailyActivity: "leger",
+  startPullUps: 1,
+  startPushUps: 8,
   createdAt: new Date(Date.now() - 42 * 86_400_000).toISOString(),
 };
 
@@ -79,17 +81,20 @@ export function buildDemoData(profile: Profile = DEMO_PROFILE) {
       const hitMax = rand() > (exercise.pattern === "isolation" ? 0.5 : 0.38);
       for (let s = 0; s < p.sets; s++) {
         const drop = s === p.sets - 1 && rand() > 0.6 ? 1 : 0;
-        const reps = Math.max(
-          p.repMin,
-          (hitMax ? p.repMax : p.repMax - 1 - Math.floor(rand() * 2)) - drop
-        );
-        sets.push({
+        const between = (lo: number, hi: number) => Math.max(lo, (hitMax ? hi : hi - 1 - Math.floor(rand() * 2)) - drop);
+        const base = {
           setIndex: s,
-          reps,
           weight,
           rir: hitMax ? (rand() > 0.5 ? 2 : 1) : 1,
           ts: date.toISOString(),
-        });
+        };
+        if (p.metric === "distance") {
+          sets.push({ ...base, reps: 0, distanceM: Math.round(between(p.distMin ?? 15, p.distMax ?? 30) / 5) * 5 });
+        } else if (p.metric === "duration") {
+          sets.push({ ...base, reps: 0, seconds: Math.round(between(p.secMin ?? 20, p.secMax ?? 45) / 5) * 5 });
+        } else {
+          sets.push({ ...base, reps: between(p.repMin, p.repMax) });
+        }
       }
       return { exerciseId: p.exerciseId, sets };
     });

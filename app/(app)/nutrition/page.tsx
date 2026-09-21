@@ -2,72 +2,207 @@
 
 import Link from "next/link";
 import { motion } from "motion/react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Page, TopBar } from "@/components/AppShell";
 import { Icon } from "@/components/ui/Icon";
-import { Button, Card, cx, InfoNote, SectionTitle, Sheet } from "@/components/ui/primitives";
+import { Button, Card, cx, InfoNote, Sheet } from "@/components/ui/primitives";
 import { Counter, MacroBar, ProgressRing } from "@/components/ui/progress";
 import { useApp, useTargets } from "@/lib/store";
-import { addMacros, emptyMacros, weeklyWeightDelta } from "@/lib/nutrition";
-import { getRecipe } from "@/lib/data/recipes";
-import { SLOTS } from "@/lib/data/recipes";
+import { FIXED_MEALS, SLOTS, getRecipe } from "@/lib/data/recipes";
+import { addMacros, calorieAdjustment, emptyMacros, remainingToday, scaleMacros } from "@/lib/nutrition";
 import { SAFETY } from "@/lib/copy";
-import { today } from "@/lib/format";
+import { nf, today } from "@/lib/format";
 
 export default function NutritionPage() {
   const profile = useApp((s) => s.profile)!;
   const meals = useApp((s) => s.meals);
   const mealPlan = useApp((s) => s.mealPlan);
+  const weights = useApp((s) => s.weights);
+  const creatine = useApp((s) => s.creatine);
   const logMeal = useApp((s) => s.logMeal);
   const removeMeal = useApp((s) => s.removeMeal);
-  const setTargets = useApp((s) => s.setTargets);
+  const toggleCreatine = useApp((s) => s.toggleCreatine);
   const targets = useTargets()!;
-  const [adjustOpen, setAdjustOpen] = useState(false);
-  const [draftKcal, setDraftKcal] = useState(targets.kcal);
-  const [draftProt, setDraftProt] = useState(targets.prot);
+  const [openRecipe, setOpenRecipe] = useState<string | null>(null);
 
   const dayMeals = meals.filter((m) => m.date === today());
   const eaten = dayMeals.reduce((a, m) => addMacros(a, m.macros), emptyMacros());
-  const todayIndex = (new Date().getDay() + 6) % 7;
-  const plannedToday = mealPlan.filter((m) => m.day === todayIndex);
-  const kcalRatio = targets.kcal ? eaten.kcal / targets.kcal : 0;
+  const todayIdx = (new Date().getDay() + 6) % 7;
+  const planned = mealPlan.filter((m) => m.day === todayIdx);
+  const left = remainingToday(targets, eaten);
+  const adjustment = useMemo(() => calorieAdjustment(weights, profile), [weights, profile]);
+  const creatineTaken = creatine.includes(today());
+
+  const recipe = openRecipe ? getRecipe(openRecipe) : null;
+  const catchUp = getRecipe("quick-smoothie")!;
+  const catchUpServings = Math.min(2, Math.max(0.5, Math.round((left.kcal / catchUp.macros.kcal) * 2) / 2));
 
   return (
     <Page>
-      <TopBar
-        title="Nutrition"
-        subtitle={`Objectif ${targets.kcal} kcal · ${targets.prot} g de protéines`}
-        action={
-          <button onClick={() => setAdjustOpen(true)} className="tap grid h-10 w-10 place-items-center rounded-2xl border border-white/10 text-chalk-dim" aria-label="Ajuster">
-            <Icon name="settings" size={18} />
-          </button>
-        }
-      />
+      <TopBar title="Ce que je mange" subtitle={`Objectif : ${targets.kcal} kcal et au moins ${targets.prot} g de protéines`} />
 
+      {/* Compteur du jour */}
       <Card className="mb-4 p-5">
         <div className="flex items-center gap-5">
-          <ProgressRing value={kcalRatio} size={104} stroke={10} tone={kcalRatio > 1.08 ? "violet" : "ember"}>
+          <ProgressRing value={targets.kcal ? eaten.kcal / targets.kcal : 0} size={104} stroke={10}>
             <div className="text-center">
               <p className="num font-display text-xl font-extrabold leading-none">
                 <Counter value={Math.round(eaten.kcal)} />
               </p>
-              <p className="text-[10px] text-chalk-mute">/ {targets.kcal}</p>
+              <p className="text-[10px] text-chalk-mute">sur {targets.kcal}</p>
             </div>
           </ProgressRing>
           <div className="flex-1 space-y-3">
+            <MacroBar label="Calories" value={eaten.kcal} target={targets.kcal} unit="kcal" tone="ember" />
             <MacroBar label="Protéines" value={eaten.prot} target={targets.prot} unit="g" tone="volt" />
             <MacroBar label="Glucides" value={eaten.carbs} target={targets.carbs} unit="g" tone="cyan" />
-            <MacroBar label="Lipides" value={eaten.fat} target={targets.fat} unit="g" tone="violet" />
           </div>
         </div>
-        <p className="mt-4 text-[12px] text-chalk-mute">
-          Maintenance estimée {targets.maintenance} kcal · {targets.surplus >= 0 ? "surplus" : "déficit"} de{" "}
-          {Math.abs(targets.surplus)} kcal ≈ {weeklyWeightDelta(targets.surplus) > 0 ? "+" : ""}
-          {weeklyWeightDelta(targets.surplus).toFixed(2).replace(".", ",")} kg par semaine.
-        </p>
+        {left.kcal > 0 ? (
+          <p className="mt-4 text-[13.5px] text-chalk-dim">
+            Il te reste <span className="font-semibold text-chalk">{left.kcal} kcal</span>
+            {left.prot > 0 && (
+              <>
+                {" "}
+                et <span className="font-semibold text-chalk">{left.prot} g de protéines</span>
+              </>
+            )}{" "}
+            à manger aujourd&apos;hui.
+          </p>
+        ) : (
+          <p className="mt-4 text-[13.5px] text-volt-400">Objectif du jour atteint.</p>
+        )}
       </Card>
 
-      <div className="mb-5 grid grid-cols-3 gap-2">
+      {/* Rattrapage de fin de journée */}
+      {left.short && new Date().getHours() >= 17 && (
+        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
+          <Card className="mb-4 border-ember-500/25 bg-ember-500/[.06] p-5">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-ember-300">Fin de journée</p>
+            <p className="mt-1.5 text-[15px] font-semibold">Il te manque environ {left.kcal} kcal.</p>
+            <p className="mt-1 text-[13.5px] leading-relaxed text-chalk-dim">
+              Le plus simple : un {catchUp.name.toLowerCase()}, en {catchUpServings === 1 ? "une portion" : `${nf(catchUpServings, 1)} portions`}.
+            </p>
+            <div className="mt-3 space-y-1">
+              {catchUp.ingredients.map((ing) => (
+                <div key={ing.name} className="flex justify-between text-[13px]">
+                  <span className="text-chalk-dim">{ing.name}</span>
+                  <span className="num text-chalk-mute">
+                    {Math.round(ing.qty * catchUpServings * 10) / 10} {ing.unit === "u" ? "" : ing.unit}
+                  </span>
+                </div>
+              ))}
+            </div>
+            <Button
+              full
+              size="lg"
+              icon="plus"
+              className="mt-4"
+              onClick={() =>
+                logMeal({
+                  date: today(),
+                  recipeId: catchUp.id,
+                  label: catchUp.name,
+                  macros: scaleMacros(catchUp.macros, catchUpServings),
+                })
+              }
+            >
+              Je l&apos;ai bu
+            </Button>
+          </Card>
+        </motion.div>
+      )}
+
+      {/* Repas du jour */}
+      <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-chalk-mute">Les repas d&apos;aujourd&apos;hui</p>
+      <div className="mb-4 space-y-2.5">
+        {SLOTS.map((slot) => {
+          const entry = planned.find((m) => m.slot === slot.id);
+          const r = entry ? getRecipe(entry.recipeId) : null;
+          if (!r) return null;
+          const already = dayMeals.find((m) => m.recipeId === r.id);
+          return (
+            <Card key={slot.id} className={cx("overflow-hidden p-0", already && "opacity-60")}>
+              <button onClick={() => setOpenRecipe(r.id)} className="tap flex w-full items-center gap-3 p-3 text-left">
+                <span
+                  className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl text-2xl"
+                  style={{ background: `linear-gradient(135deg, ${r.gradient[0]}44, ${r.gradient[1]}22)` }}
+                >
+                  {r.emoji}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="text-[10.5px] uppercase tracking-wider text-chalk-mute">
+                    {slot.label} · {slot.when}
+                  </p>
+                  <p className="truncate text-[15px] font-semibold">{r.name}</p>
+                  <p className="num text-[12px] text-chalk-mute">
+                    {r.macros.kcal} kcal · {r.macros.prot} g de protéines · {r.minutes} min
+                  </p>
+                </div>
+                <Icon name="right" size={16} className="shrink-0 text-chalk-mute" />
+              </button>
+              <button
+                onClick={() =>
+                  already
+                    ? removeMeal(already.id)
+                    : logMeal({ date: today(), recipeId: r.id, label: r.name, macros: r.macros })
+                }
+                className={cx(
+                  "tap flex w-full items-center justify-center gap-2 border-t border-white/[.06] py-3 text-[13.5px] font-semibold transition",
+                  already ? "text-volt-400" : "text-ember-300"
+                )}
+              >
+                <Icon name={already ? "check" : "plus"} size={16} />
+                {already ? "Mangé" : "J'ai mangé ce repas"}
+              </button>
+            </Card>
+          );
+        })}
+      </div>
+
+      {/* Créatine */}
+      <button
+        onClick={() => toggleCreatine()}
+        className={cx(
+          "tap mb-4 flex w-full items-center gap-3 rounded-2xl border px-4 py-3.5 text-left transition",
+          creatineTaken ? "border-volt-500/40 bg-volt-500/[.08]" : "border-white/10 bg-white/[.03]"
+        )}
+      >
+        <span
+          className={cx(
+            "grid h-9 w-9 shrink-0 place-items-center rounded-xl",
+            creatineTaken ? "bg-volt-500 text-ink-950" : "bg-white/[.06] text-chalk-mute"
+          )}
+        >
+          <Icon name={creatineTaken ? "check" : "plus"} size={17} strokeWidth={2.4} />
+        </span>
+        <div className="flex-1">
+          <p className="text-[14px] font-semibold">5 g de créatine monohydrate</p>
+          <p className="text-[12px] text-chalk-mute">
+            Tu peux la prendre avec n&apos;importe quel repas. L&apos;important est d&apos;en prendre tous les jours.
+          </p>
+        </div>
+      </button>
+
+      {/* Journal */}
+      {dayMeals.length > 0 && (
+        <>
+          <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-chalk-mute">Déjà mangé</p>
+          <Card className="mb-4 divide-y divide-white/[.05] p-0">
+            {dayMeals.map((m) => (
+              <div key={m.id} className="flex items-center gap-3 px-4 py-3">
+                <span className="flex-1 truncate text-[13.5px]">{m.label}</span>
+                <span className="num text-[12px] text-chalk-mute">{Math.round(m.macros.kcal)} kcal</span>
+                <button onClick={() => removeMeal(m.id)} className="tap text-chalk-mute hover:text-danger" aria-label="Retirer">
+                  <Icon name="x" size={15} />
+                </button>
+              </div>
+            ))}
+          </Card>
+        </>
+      )}
+
+      <div className="mb-4 grid grid-cols-3 gap-2">
         {[
           { href: "/nutrition/recettes", icon: "chef", label: "Recettes" },
           { href: "/nutrition/plan", icon: "calendar", label: "Semaine" },
@@ -84,136 +219,84 @@ export default function NutritionPage() {
         ))}
       </div>
 
-      <SectionTitle>Prévu aujourd&apos;hui</SectionTitle>
-      <div className="mb-5 space-y-2">
-        {plannedToday.map((entry) => {
-          const r = getRecipe(entry.recipeId);
-          if (!r) return null;
-          const already = dayMeals.some((m) => m.recipeId === r.id);
-          return (
-            <motion.div key={entry.slot} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}>
-              <Card className={cx("flex items-center gap-3 p-3", already && "opacity-60")}>
-                <Link href={`/nutrition/recettes/${r.slug}`} className="tap flex min-w-0 flex-1 items-center gap-3">
-                  <span
-                    className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl text-xl"
-                    style={{ background: `linear-gradient(135deg, ${r.gradient[0]}33, ${r.gradient[1]}22)` }}
-                  >
-                    {r.emoji}
-                  </span>
-                  <div className="min-w-0">
-                    <p className="text-[10.5px] uppercase tracking-wider text-chalk-mute">
-                      {SLOTS.find((s) => s.id === entry.slot)?.label}
-                    </p>
-                    <p className="truncate text-[14px] font-semibold">{r.name}</p>
-                    <p className="num text-[11.5px] text-chalk-mute">
-                      {r.macros.kcal} kcal · {r.macros.prot} g prot.
-                    </p>
-                  </div>
-                </Link>
-                <button
-                  onClick={() =>
-                    already
-                      ? removeMeal(dayMeals.find((m) => m.recipeId === r.id)!.id)
-                      : logMeal({ date: today(), recipeId: r.id, label: r.name, macros: r.macros })
-                  }
-                  className={cx(
-                    "tap grid h-10 w-10 shrink-0 place-items-center rounded-2xl transition",
-                    already ? "bg-volt-500/15 text-volt-400" : "bg-ember-500/15 text-ember-300"
-                  )}
-                  aria-label={already ? "Retirer du journal" : "Ajouter à ma journée"}
-                >
-                  <Icon name={already ? "check" : "plus"} size={18} />
-                </button>
-              </Card>
-            </motion.div>
-          );
-        })}
+      {adjustment.reason && <InfoNote tone={adjustment.actionable ? "warn" : "neutral"}>{adjustment.reason}</InfoNote>}
+      <div className="mt-3">
+        <InfoNote>{SAFETY.nutritionDisclaimer}</InfoNote>
       </div>
 
-      {dayMeals.length > 0 && (
-        <>
-          <SectionTitle>Journal du jour</SectionTitle>
-          <Card className="mb-5 divide-y divide-white/[.05] p-0">
-            {dayMeals.map((m) => (
-              <div key={m.id} className="flex items-center gap-3 px-4 py-3">
-                <span className="flex-1 truncate text-[13.5px]">{m.label}</span>
-                <span className="num text-[12px] text-chalk-mute">{Math.round(m.macros.kcal)} kcal</span>
-                <button onClick={() => removeMeal(m.id)} className="tap text-chalk-mute hover:text-danger" aria-label="Retirer">
-                  <Icon name="x" size={15} />
-                </button>
-              </div>
-            ))}
-          </Card>
-        </>
-      )}
-
-      <InfoNote>{SAFETY.nutritionDisclaimer}</InfoNote>
-
-      <Sheet open={adjustOpen} onClose={() => setAdjustOpen(false)} title="Ajuster mes objectifs">
-        <div className="space-y-4 pb-4">
-          <div className="rounded-2xl border border-white/10 bg-white/[.03] p-4">
-            <div className="flex items-baseline justify-between">
-              <span className="text-[13px]">Calories</span>
-              <span className="num font-display text-xl font-bold">{draftKcal} kcal</span>
-            </div>
-            <input
-              type="range"
-              min={Math.round(targets.maintenance * 0.7)}
-              max={Math.round(targets.maintenance * 1.35)}
-              step={10}
-              value={draftKcal}
-              onChange={(e) => setDraftKcal(Number(e.target.value))}
-              className="mt-3 h-1.5 w-full appearance-none rounded-full bg-white/10 accent-[#ff6b2c]"
-            />
-            <p className="mt-2 text-[11.5px] text-chalk-mute">
-              Maintenance estimée : {targets.maintenance} kcal ({draftKcal - targets.maintenance >= 0 ? "+" : ""}
-              {draftKcal - targets.maintenance} kcal)
-            </p>
-          </div>
-          <div className="rounded-2xl border border-white/10 bg-white/[.03] p-4">
-            <div className="flex items-baseline justify-between">
-              <span className="text-[13px]">Protéines</span>
-              <span className="num font-display text-xl font-bold">{draftProt} g</span>
-            </div>
-            <input
-              type="range"
-              min={Math.round(profile.weightKg * 1.2)}
-              max={Math.round(profile.weightKg * 2.6)}
-              step={5}
-              value={draftProt}
-              onChange={(e) => setDraftProt(Number(e.target.value))}
-              className="mt-3 h-1.5 w-full appearance-none rounded-full bg-white/10 accent-[#ff6b2c]"
-            />
-            <p className="mt-2 text-[11.5px] text-chalk-mute">
-              {(draftProt / profile.weightKg).toFixed(1).replace(".", ",")} g par kg de poids de corps
-            </p>
-          </div>
-          <InfoNote tone="warn">{SAFETY.nutritionDisclaimer}</InfoNote>
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="lg"
-              onClick={() => {
-                setTargets(null);
-                setAdjustOpen(false);
-              }}
+      {/* Fiche recette */}
+      <Sheet open={!!recipe} onClose={() => setOpenRecipe(null)} title={recipe?.name}>
+        {recipe && (
+          <div className="space-y-4 pb-4">
+            <div
+              className="flex h-28 items-center justify-center rounded-2xl text-5xl"
+              style={{ background: `linear-gradient(140deg, ${recipe.gradient[0]}44, ${recipe.gradient[1]}22)` }}
             >
-              Réinitialiser
-            </Button>
+              {recipe.emoji}
+            </div>
+
+            <div className="grid grid-cols-3 gap-2 text-center">
+              {[
+                { l: "kcal", v: recipe.macros.kcal },
+                { l: "Protéines", v: `${recipe.macros.prot} g` },
+                { l: "Préparation", v: `${recipe.minutes} min` },
+              ].map((m) => (
+                <div key={m.l} className="rounded-2xl bg-white/[.04] py-3">
+                  <p className="num font-display text-[17px] font-bold">{m.v}</p>
+                  <p className="text-[10.5px] text-chalk-mute">{m.l}</p>
+                </div>
+              ))}
+            </div>
+
+            {FIXED_MEALS[recipe.id] && (
+              <p className="rounded-2xl border border-ember-500/25 bg-ember-500/[.07] px-4 py-3 text-[13.5px] font-semibold text-ember-300/90">
+                {FIXED_MEALS[recipe.id]}
+              </p>
+            )}
+
+            <div>
+              <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-chalk-mute">Ce qu&apos;il te faut</p>
+              <div className="divide-y divide-white/[.05] rounded-2xl border border-white/8">
+                {recipe.ingredients.map((ing) => (
+                  <div key={ing.name} className="flex items-center justify-between px-4 py-2.5">
+                    <span className="text-[13.5px]">{ing.name}</span>
+                    <span className="num text-[13px] font-semibold text-chalk-dim">
+                      {ing.qty} {ing.unit === "u" ? "" : ing.unit}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-chalk-mute">Préparation</p>
+              <ol className="space-y-2.5">
+                {recipe.steps.map((s, i) => (
+                  <li key={s} className="flex gap-3">
+                    <span className="num grid h-6 w-6 shrink-0 place-items-center rounded-lg bg-ember-500/15 text-[12px] font-bold text-ember-300">
+                      {i + 1}
+                    </span>
+                    <span className="text-[14px] leading-relaxed">{s}</span>
+                  </li>
+                ))}
+              </ol>
+            </div>
+
+            <p className="text-[12.5px] text-chalk-mute">{recipe.storage}</p>
+
             <Button
               full
               size="lg"
               icon="check"
               onClick={() => {
-                const carbs = Math.max(60, Math.round((draftKcal - draftProt * 4 - targets.fat * 9) / 4));
-                setTargets({ kcal: draftKcal, prot: draftProt, carbs });
-                setAdjustOpen(false);
+                logMeal({ date: today(), recipeId: recipe.id, label: recipe.name, macros: recipe.macros });
+                setOpenRecipe(null);
               }}
             >
-              Enregistrer
+              J&apos;ai mangé ce repas
             </Button>
           </div>
-        </div>
+        )}
       </Sheet>
     </Page>
   );
