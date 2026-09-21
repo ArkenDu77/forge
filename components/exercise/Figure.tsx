@@ -202,9 +202,7 @@ export function ExerciseFigure({
         <ellipse ref={reg("glow")} cx={r2(initial.hip[0])} cy="128" rx="54" ry="14" fill={`url(#gl-${uid})`} />
 
         <g opacity="0.9">
-          {media.props.map((p, i) => (
-            <PropShape key={i} spec={p} />
-          ))}
+          {media.props.map((p, i) => ("front" in p && p.front ? null : <PropShape key={i} spec={p} />))}
         </g>
 
         {trail && (
@@ -245,6 +243,12 @@ export function ExerciseFigure({
         </g>
 
         <LoadShape load={media.load} sk={initial} c1={c1} uid={uid} reg={reg} front={media.view === "front"} />
+
+        {/* Un objet tenu contre le corps se dessine après la silhouette,
+            sinon le tronc le recouvre entièrement. */}
+        <g opacity="0.95">
+          {media.props.map((p, i) => ("front" in p && p.front ? <PropShape key={i} spec={p} /> : null))}
+        </g>
       </svg>
     </div>
   );

@@ -44,7 +44,8 @@ export type PropSpec =
   | { kind: "pulley"; x: number; y: number }
   | { kind: "platform"; x: number; y: number; w?: number; h?: number }
   | { kind: "step"; x: number; y: number }
-  | { kind: "bag"; x: number; y: number; r?: number };
+  /** `front` : dessiné par-dessus la silhouette, pour un objet tenu contre soi. */
+  | { kind: "bag"; x: number; y: number; r?: number; front?: boolean };
 
 export type LoadSpec =
   | { kind: "barbell"; r?: number }

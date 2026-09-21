@@ -162,11 +162,11 @@ export const EXTRA_EXERCISES: Exercise[] = [
       view: "front",
       tempoMs: 950,
       captions: ["Pas gauche", "Pas droit"],
-      props: [{ kind: "floor" }, { kind: "bag", x: 100, y: 58, r: 17 }],
+      props: [{ kind: "floor" }, { kind: "bag", x: 100, y: 56, r: 19, front: true }],
       load: { kind: "none" },
       poses: [
-        stand({ hip: [100, 74], upperArm: 26, foreArm: 164, thigh: 85, shin: 95 }),
-        stand({ hip: [100, 72], upperArm: 26, foreArm: 164, thigh: 95, shin: 85 }),
+        stand({ hip: [100, 74], upperArm: 45, foreArm: 168, thigh: 85, shin: 95 }),
+        stand({ hip: [100, 72], upperArm: 45, foreArm: 168, thigh: 95, shin: 85 }),
       ],
     },
   },
@@ -221,10 +221,20 @@ export const EXTRA_EXERCISES: Exercise[] = [
       tempoMs: 1700,
       captions: ["Debout", "Barre au sol"],
       props: [{ kind: "floor" }],
-      load: { kind: "dumbbell" },
+      // Le disque de la trap-bar au niveau de la main : c'est ce qui rend
+      // l'exercice reconnaissable de profil.
+      load: { kind: "barbell" },
       poses: [
-        ikPose({ hip: [100, 72], torso: -90, ankle: [100, 132], upperArm: 90, foreArm: 90 }),
-        ikPose({ hip: [90, 96], torso: -58, ankle: [100, 132], kneeBend: -1, wrist: [104, 112], elbowBend: -1 }),
+        // Debout : bras très légèrement en avant et jambes décalées, sinon
+        // tous les segments se superposent et la silhouette devient une planche.
+        ikPose({
+          hip: [100, 72], torso: -92, ankle: [100, 132],
+          upperArm: 84, foreArm: 87, farArm: [96, 94], farLeg: [83, 97],
+        }),
+        ikPose({
+          hip: [92, 96], torso: -62, ankle: [102, 132], kneeBend: -1,
+          wrist: [106, 110], elbowBend: -1, farArm: [98, 96], farLeg: [70, 108],
+        }),
       ],
     },
   },
