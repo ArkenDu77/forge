@@ -24,7 +24,7 @@ import { useApp } from "@/lib/store";
 import { detectPRs, historyFor, recommendLoad, workingWeight } from "@/lib/progression";
 import { BAR_WEIGHT } from "@/lib/estimator";
 import { sessionSummaryLine, volume } from "@/lib/coach";
-import { kg, mmss, nf, tons } from "@/lib/format";
+import { kg, nf, tons } from "@/lib/format";
 import { weeksSince } from "@/lib/projection";
 import type { ProgramExercise, SetLog, WorkoutSession } from "@/lib/types";
 
@@ -84,7 +84,9 @@ export default function WorkoutPage({ params }: PageProps<"/seance/[dayId]">) {
   const [lastLine, setLastLine] = useState<string | undefined>();
 
   const baseDay = getDay(dayId);
-  const week = profile ? weeksSince(profile.createdAt) + 1 : 99;
+  // La séance en cours porte sa propre semaine : l'écran ne la recalcule pas,
+  // sinon il afficherait un autre nombre de séries que celui que le magasin compte.
+  const week = active?.week ?? (profile ? weeksSince(profile.createdAt) + 1 : 99);
   const day = useMemo(() => (baseDay ? adaptForWeek(baseDay, week) : undefined), [baseDay, week]);
 
   const plan = day && active ? day.exercises[active.exIndex] : null;
@@ -97,6 +99,86 @@ export default function WorkoutPage({ params }: PageProps<"/seance/[dayId]">) {
 
   if (!profile) return <Skeleton className="m-4 h-64" />;
   if (!day) return <div className="p-8 text-center text-chalk-dim">Séance introuvable.</div>;
+
+  /* ---------------- Fin de séance ---------------- */
+  if (summary) {
+    const line = sessionSummaryLine(summary, sessions.filter((x) => x.id !== summary.id));
+    const nextDayLabel = day.index < 4 ? "Prochaine séance dans deux jours." : "Prochaine séance : lundi.";
+    return (
+      <main className="mx-auto min-h-dvh w-full max-w-lg px-4 pb-10 pt-10">
+        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="text-center">
+          <motion.span
+            initial={{ scale: 0, rotate: -25 }}
+            animate={{ scale: 1, rotate: 0 }}
+            transition={{ type: "spring", stiffness: 260, damping: 15 }}
+            className="mx-auto grid h-24 w-24 place-items-center rounded-[28px] bg-gradient-to-br from-ember-400 to-ember-600 text-ink-950"
+          >
+            <Icon name="check" size={46} strokeWidth={2.6} />
+          </motion.span>
+          <h1 className="mt-5 font-display text-3xl font-extrabold">Séance terminée</h1>
+          <p className="mt-2 text-[14px] text-chalk-dim">{line.text}</p>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 14 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15 }}
+          className="mt-7 grid grid-cols-3 gap-2"
+        >
+          {[
+            { l: "Durée", v: `${Math.max(1, Math.round(summary.durationSec / 60))} min` },
+            { l: "Exercices", v: summary.entries.length },
+            { l: "Séries", v: summary.entries.reduce((a, e) => a + e.sets.length, 0) },
+          ].map((s) => (
+            <Card key={s.l} className="p-4 text-center">
+              <p className="num font-display text-xl font-extrabold text-gradient-ember">{s.v}</p>
+              <p className="mt-0.5 text-[11px] text-chalk-mute">{s.l}</p>
+            </Card>
+          ))}
+        </motion.div>
+
+        {summary.prs.length > 0 && (
+          <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} className="mt-4 space-y-2">
+            {summary.prs.slice(0, 3).map((pr, i) => (
+              <Card key={i} className="flex items-center gap-3 p-4">
+                <span className="grid h-10 w-10 place-items-center rounded-xl bg-ember-500/15 text-ember-300">
+                  <Icon name="trophy" size={19} />
+                </span>
+                <div className="flex-1">
+                  <p className="text-[11px] uppercase tracking-[0.14em] text-ember-300">Meilleur résultat</p>
+                  <p className="text-sm font-semibold">{ex(pr.exerciseId).shortName ?? ex(pr.exerciseId).name}</p>
+                </div>
+                <span className="num font-display text-lg font-bold">{kg(pr.value)}</span>
+              </Card>
+            ))}
+          </motion.div>
+        )}
+
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.35 }} className="mt-4 space-y-2">
+          {summary.entries.map((e) => (
+            <div key={e.exerciseId} className="flex items-center gap-3 rounded-2xl border border-white/[.06] bg-white/[.02] px-4 py-3">
+              <Icon name="check" size={15} className="shrink-0 text-volt-400" />
+              <span className="flex-1 truncate text-[13.5px]">{ex(e.exerciseId).shortName ?? ex(e.exerciseId).name}</span>
+              <span className="num text-[12px] text-chalk-mute">{e.sets.map(setResultWords).join(" · ")}</span>
+            </div>
+          ))}
+        </motion.div>
+
+        <p className="mt-5 text-center text-[13px] text-chalk-mute">
+          Volume soulevé : {tons(volume(summary))}. {nextDayLabel}
+        </p>
+
+        <div className="mt-6 space-y-2">
+          <Button size="xl" full href="/" icon="home">
+            Retour à l&apos;accueil
+          </Button>
+          <Button variant="ghost" full href="/progression">
+            Voir ma progression
+          </Button>
+        </div>
+      </main>
+    );
+  }
 
   if (!active || active.dayId !== dayId) {
     return (
@@ -125,6 +207,12 @@ export default function WorkoutPage({ params }: PageProps<"/seance/[dayId]">) {
   const warmupDone = entry.sets.filter((s) => s.warmup).length;
   const workingDone = entry.sets.filter((s) => !s.warmup).length;
   const inWarmup = warmupDone < warmupPlan.length && workingDone === 0;
+  // Toutes les séries de cet exercice sont faites : on ne propose pas une
+  // « série 3 sur 2 », on annonce que c'est plié.
+  const exerciseComplete = !inWarmup && workingDone >= plan.sets;
+  const nextUnfinished = day.exercises.findIndex(
+    (p, i) => i !== active.exIndex && !active.entries[i].skipped && active.entries[i].sets.filter((x) => !x.warmup).length < p.sets
+  );
   const currentWarmup = warmupPlan[warmupDone];
 
   const totalSets = day.exercises.reduce((a, e) => a + e.sets, 0);
@@ -207,85 +295,6 @@ export default function WorkoutPage({ params }: PageProps<"/seance/[dayId]">) {
     else router.push("/");
   };
 
-  /* ---------------- Fin de séance ---------------- */
-  if (summary) {
-    const line = sessionSummaryLine(summary, sessions.filter((x) => x.id !== summary.id));
-    const nextDayLabel = day.index < 4 ? "Prochaine séance dans deux jours." : "Prochaine séance : lundi.";
-    return (
-      <main className="mx-auto min-h-dvh w-full max-w-lg px-4 pb-10 pt-10">
-        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="text-center">
-          <motion.span
-            initial={{ scale: 0, rotate: -25 }}
-            animate={{ scale: 1, rotate: 0 }}
-            transition={{ type: "spring", stiffness: 260, damping: 15 }}
-            className="mx-auto grid h-24 w-24 place-items-center rounded-[28px] bg-gradient-to-br from-ember-400 to-ember-600 text-ink-950"
-          >
-            <Icon name="check" size={46} strokeWidth={2.6} />
-          </motion.span>
-          <h1 className="mt-5 font-display text-3xl font-extrabold">Séance terminée</h1>
-          <p className="mt-2 text-[14px] text-chalk-dim">{line.text}</p>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 14 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.15 }}
-          className="mt-7 grid grid-cols-3 gap-2"
-        >
-          {[
-            { l: "Durée", v: `${Math.max(1, Math.round(summary.durationSec / 60))} min` },
-            { l: "Exercices", v: summary.entries.length },
-            { l: "Séries", v: summary.entries.reduce((a, e) => a + e.sets.length, 0) },
-          ].map((s) => (
-            <Card key={s.l} className="p-4 text-center">
-              <p className="num font-display text-xl font-extrabold text-gradient-ember">{s.v}</p>
-              <p className="mt-0.5 text-[11px] text-chalk-mute">{s.l}</p>
-            </Card>
-          ))}
-        </motion.div>
-
-        {summary.prs.length > 0 && (
-          <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} className="mt-4 space-y-2">
-            {summary.prs.slice(0, 3).map((pr, i) => (
-              <Card key={i} className="flex items-center gap-3 p-4">
-                <span className="grid h-10 w-10 place-items-center rounded-xl bg-ember-500/15 text-ember-300">
-                  <Icon name="trophy" size={19} />
-                </span>
-                <div className="flex-1">
-                  <p className="text-[11px] uppercase tracking-[0.14em] text-ember-300">Meilleur résultat</p>
-                  <p className="text-sm font-semibold">{ex(pr.exerciseId).shortName ?? ex(pr.exerciseId).name}</p>
-                </div>
-                <span className="num font-display text-lg font-bold">{kg(pr.value)}</span>
-              </Card>
-            ))}
-          </motion.div>
-        )}
-
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.35 }} className="mt-4 space-y-2">
-          {summary.entries.map((e) => (
-            <div key={e.exerciseId} className="flex items-center gap-3 rounded-2xl border border-white/[.06] bg-white/[.02] px-4 py-3">
-              <Icon name="check" size={15} className="shrink-0 text-volt-400" />
-              <span className="flex-1 truncate text-[13.5px]">{ex(e.exerciseId).shortName ?? ex(e.exerciseId).name}</span>
-              <span className="num text-[12px] text-chalk-mute">{e.sets.map(setResultWords).join(" · ")}</span>
-            </div>
-          ))}
-        </motion.div>
-
-        <p className="mt-5 text-center text-[13px] text-chalk-mute">
-          Volume soulevé : {tons(volume(summary))}. {nextDayLabel}
-        </p>
-
-        <div className="mt-6 space-y-2">
-          <Button size="xl" full href="/" icon="home">
-            Retour à l&apos;accueil
-          </Button>
-          <Button variant="ghost" full href="/progression">
-            Voir ma progression
-          </Button>
-        </div>
-      </main>
-    );
-  }
 
   /* ---------------- Échauffement cardio ---------------- */
   if (active.phase === "cardio") {
@@ -464,6 +473,30 @@ export default function WorkoutPage({ params }: PageProps<"/seance/[dayId]">) {
               </motion.div>
             ) : (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-5 space-y-3">
+                {exerciseComplete ? (
+                  <>
+                    <Card className="border-volt-500/25 bg-volt-500/[.06] p-5">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-volt-300">
+                        {plan.metric === "distance" ? "Passages terminés" : "Exercice terminé"}
+                      </p>
+                      <p className="mt-2 font-display text-[22px] font-extrabold leading-tight">
+                        {plan.sets} {plan.metric === "distance" ? "passages" : "séries"} sur {plan.sets}
+                      </p>
+                      <p className="mt-1.5 text-[13.5px] text-chalk-dim">
+                        {allDone
+                          ? "C'était le dernier. Il ne reste qu'à enregistrer ta séance."
+                          : nextUnfinished >= 0
+                            ? `Ensuite : ${ex(active.substitutions[day.exercises[nextUnfinished].exerciseId] ?? day.exercises[nextUnfinished].exerciseId).name}.`
+                            : "Tu peux enregistrer ta séance."}
+                      </p>
+                    </Card>
+                    {!allDone && nextUnfinished >= 0 && (
+                      <Button size="xl" full icon="right" onClick={() => goToExercise(nextUnfinished)}>
+                        Passer à l&apos;exercice suivant
+                      </Button>
+                    )}
+                  </>
+                ) : (
                 <Card className={cx("p-5", inWarmup && "border-ember-500/25 bg-ember-500/[.05]")}>
                   <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-chalk-mute">
                     {inWarmup
@@ -487,8 +520,9 @@ export default function WorkoutPage({ params }: PageProps<"/seance/[dayId]">) {
                     </p>
                   )}
                 </Card>
+                )}
 
-                {exercise.loadModel !== "bodyweight" && (
+                {!exerciseComplete && exercise.loadModel !== "bodyweight" && (
                   <>
                     <WeightStepper
                       value={weight}
@@ -508,9 +542,11 @@ export default function WorkoutPage({ params }: PageProps<"/seance/[dayId]">) {
                   </>
                 )}
 
-                <Button size="xl" full icon="check" onClick={() => setLogging(true)}>
-                  {inWarmup ? "Échauffement fait" : "J'ai fini ma série"}
-                </Button>
+                {!exerciseComplete && (
+                  <Button size="xl" full icon="check" onClick={() => setLogging(true)}>
+                    {inWarmup ? "Échauffement fait" : "J'ai fini ma série"}
+                  </Button>
+                )}
 
                 <HelpButtons
                   exercise={exercise}
@@ -518,12 +554,14 @@ export default function WorkoutPage({ params }: PageProps<"/seance/[dayId]">) {
                   onSubstitute={(id) => substitute(plan.exerciseId, id)}
                 />
 
-                <button
-                  onClick={skipExercise}
-                  className="tap w-full py-2 text-center text-[12.5px] text-chalk-mute underline underline-offset-4"
-                >
-                  Passer cet exercice
-                </button>
+                {!exerciseComplete && (
+                  <button
+                    onClick={skipExercise}
+                    className="tap w-full py-2 text-center text-[12.5px] text-chalk-mute underline underline-offset-4"
+                  >
+                    Passer cet exercice
+                  </button>
+                )}
               </motion.div>
             )}
 

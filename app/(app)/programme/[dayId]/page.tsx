@@ -10,7 +10,6 @@ import { Icon } from "@/components/ui/Icon";
 import { Badge, Button, Card, InfoNote } from "@/components/ui/primitives";
 import { adaptForWeek, getDay } from "@/lib/data/program";
 import { ex } from "@/lib/data/exercises";
-import { coachingFor } from "@/lib/data/coaching";
 import { muscleName } from "@/lib/data/muscles";
 import { useApp } from "@/lib/store";
 import { historyFor, recommendLoad } from "@/lib/progression";

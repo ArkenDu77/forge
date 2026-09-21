@@ -17,7 +17,7 @@ import { SLOTS, getRecipe } from "@/lib/data/recipes";
 import { addMacros, calorieAdjustment, emptyMacros, weightTrend } from "@/lib/nutrition";
 import { historyFor, workingWeight } from "@/lib/progression";
 import { weeksSince } from "@/lib/projection";
-import { greeting, kg, nf, today } from "@/lib/format";
+import { greeting, nf, today } from "@/lib/format";
 
 export default function Dashboard() {
   const profile = useApp((s) => s.profile)!;

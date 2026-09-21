@@ -108,7 +108,11 @@ function ExercisePlate({
   return (
     <div ref={wrap} className={cx("relative", className)}>
       {visible && (
+        /* Deux SVG locaux superposés et recolorés au filtre CSS, qu'on fait
+           se relayer en fondu : next/image ne sait ni optimiser un SVG ni
+           produire ce fondu, il n'apporterait rien ici. */
         <>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={`/exercises/${id}-1.svg`}
             alt={`${label} — position de départ`}
@@ -119,6 +123,7 @@ function ExercisePlate({
             draggable={false}
           />
           {!single && (
+            // eslint-disable-next-line @next/next/no-img-element
             <img
               src={`/exercises/${id}-2.svg`}
               alt={`${label} — position d'arrivée`}

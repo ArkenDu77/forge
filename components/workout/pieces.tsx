@@ -119,11 +119,11 @@ const RESERVE_OPTIONS = [
   { v: 4, emoji: "😌", label: "4 ou +", hint: "Beaucoup trop facile. On montera le poids." },
 ];
 
-function optionsFor(plan: ProgramExercise, warmupReps?: number): { values: number[]; unit: string } {
+function optionsFor(plan: ProgramExercise, warmupReps?: number): number[] {
   // Une série d'échauffement a sa propre consigne : les choix tournent autour d'elle.
   if (warmupReps) {
     const values = [warmupReps - 3, warmupReps - 1, warmupReps, warmupReps + 2].filter((n) => n > 0);
-    return { values: [...new Set(values)], unit: "répétitions" };
+    return [...new Set(values)];
   }
   if (plan.metric === "distance") {
     const lo = plan.distMin ?? 10;
@@ -132,20 +132,20 @@ function optionsFor(plan: ProgramExercise, warmupReps?: number): { values: numbe
     const values: number[] = [];
     for (let v = Math.max(step, lo - step); v <= hi; v += step) values.push(v);
     values.push(hi + step);
-    return { values, unit: "mètres" };
+    return values;
   }
   if (plan.metric === "duration") {
     const lo = plan.secMin ?? 20;
     const hi = plan.secMax ?? 45;
     const values = [Math.max(5, lo - 10), lo, Math.round((lo + hi) / 2), hi, hi + 15];
-    return { values: [...new Set(values)].sort((a, b) => a - b), unit: "secondes" };
+    return [...new Set(values)].sort((a, b) => a - b);
   }
   const span = plan.repMax - plan.repMin;
   const step = span > 6 ? 2 : 1;
   const values: number[] = [];
   for (let n = plan.repMin - step; n <= plan.repMax; n += step) if (n > 0) values.push(n);
   values.push(plan.repMax + 1);
-  return { values, unit: "répétitions" };
+  return values;
 }
 
 export function SetLogger({
@@ -165,20 +165,23 @@ export function SetLogger({
   const [amount, setAmount] = useState<number | null>(null);
   const [reserve, setReserve] = useState<number | null>(null);
   const [pain, setPain] = useState(false);
-  const { values, unit } = optionsFor(plan, isWarmup ? warmupReps : undefined);
+  const values = optionsFor(plan, isWarmup ? warmupReps : undefined);
   const cols = values.length <= 4 ? values.length : values.length <= 6 ? 3 : 4;
   const max = values[values.length - 1];
+  // La question de la réserve se compte en répétitions. Sur un porté ou une
+  // suspension, « encore 2 » ne veut rien dire : on ne la pose pas.
+  const asksReserve = !isWarmup && plan.metric === "reps";
 
   const question =
     plan.metric === "distance"
       ? "Combien de mètres as-tu parcourus ?"
       : plan.metric === "duration"
         ? "Combien de temps as-tu tenu ?"
-        : "Combien de répétitions as-tu faites ?";
+        : "Combien de répétitions as-tu réussi à faire proprement ?";
 
   const submit = () => {
     if (amount === null) return;
-    const reserveValue = isWarmup ? 4 : reserve;
+    const reserveValue = isWarmup ? 4 : asksReserve ? reserve : 2;
     if (reserveValue === null) return;
     onSubmit({
       reps: plan.metric === "reps" || isWarmup ? amount : undefined,
@@ -217,7 +220,7 @@ export function SetLogger({
       </div>
 
       <AnimatePresence>
-        {amount !== null && !isWarmup && (
+        {amount !== null && asksReserve && (
           <motion.div
             className="overflow-hidden"
             initial={{ opacity: 0, height: 0 }}
@@ -226,10 +229,10 @@ export function SetLogger({
             transition={{ duration: 0.28 }}
           >
             <p className="mb-1 text-[15px] font-semibold">
-              À la fin, tu aurais pu en faire combien de plus ?
+              À la fin, tu pouvais encore en faire combien ?
             </p>
             <p className="mb-2.5 text-[12.5px] text-chalk-mute">
-              Des {unit} en plus, si tu avais continué sans t&apos;arrêter.
+              Des répétitions propres en plus, si tu avais continué sans t&apos;arrêter.
             </p>
             <div className="grid grid-cols-5 gap-1.5">
               {RESERVE_OPTIONS.map((o) => (
@@ -275,7 +278,7 @@ export function SetLogger({
         <Button variant="ghost" size="lg" onClick={onCancel}>
           Annuler
         </Button>
-        <Button size="lg" full icon="check" disabled={amount === null || (!isWarmup && reserve === null)} onClick={submit}>
+        <Button size="lg" full icon="check" disabled={amount === null || (asksReserve && reserve === null)} onClick={submit}>
           Valider
         </Button>
       </div>

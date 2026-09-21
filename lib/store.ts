@@ -15,7 +15,8 @@ import type {
   WeightEntry,
   WorkoutSession,
 } from "@/lib/types";
-import { DEFAULT_PROGRAM, getDay } from "@/lib/data/program";
+import { adaptForWeek, DEFAULT_PROGRAM, getDay } from "@/lib/data/program";
+import { weeksSince } from "@/lib/projection";
 import { ex } from "@/lib/data/exercises";
 import { detectPRs, historyFor } from "@/lib/progression";
 import { sessionXp } from "@/lib/gamification";
@@ -26,6 +27,13 @@ import { today } from "@/lib/format";
 export type ActiveWorkout = {
   dayId: string;
   startedAt: number;
+  /**
+   * Semaine de programme figée au démarrage. La phase d'adaptation retire des
+   * séries d'isolation : sans cette valeur, le magasin compterait les séries
+   * sur le jour brut pendant que l'écran affiche le jour allégé, et une séance
+   * entamée le dimanche changerait de plan en passant minuit.
+   */
+  week: number;
   /** on commence toujours par l'échauffement cardio */
   phase: "cardio" | "exercices";
   exIndex: number;
@@ -113,9 +121,15 @@ const initial: State = {
   seenExercises: [],
 };
 
+/** Le jour tel qu'il est réellement joué : jour du programme allégé pour la semaine en cours. */
+export function playedDay(dayId: string, week: number) {
+  const base = getDay(dayId);
+  return base ? adaptForWeek(base, week) : undefined;
+}
+
 /** Index du premier exercice encore incomplet, -1 si la séance est terminée. */
-function nextIncomplete(dayId: string, entries: ExerciseSession[], from: number) {
-  const day = getDay(dayId);
+function nextIncomplete(dayId: string, week: number, entries: ExerciseSession[], from: number) {
+  const day = playedDay(dayId, week);
   if (!day) return -1;
   const done = (i: number) => {
     const plan = day.exercises[i];
@@ -136,11 +150,14 @@ export const useApp = create<State & Actions>()(
       patchProfile: (p) => set((s) => (s.profile ? { profile: { ...s.profile, ...p } } : s)),
 
       startWorkout: (dayId) => {
-        const day = getDay(dayId);
+        const profile = get().profile;
+        const week = profile ? weeksSince(profile.createdAt) + 1 : 99;
+        const day = playedDay(dayId, week);
         if (!day) return;
         set({
           active: {
             dayId,
+            week,
             startedAt: Date.now(),
             phase: "cardio",
             exIndex: 0,
@@ -162,7 +179,7 @@ export const useApp = create<State & Actions>()(
         const s = get();
         const a = s.active;
         if (!a) return;
-        const day = getDay(a.dayId);
+        const day = playedDay(a.dayId, a.week);
         if (!day) return;
         const plan = day.exercises[a.exIndex];
         const current = a.entries[a.exIndex];
@@ -198,7 +215,7 @@ export const useApp = create<State & Actions>()(
         const restSec = payload.warmup
           ? plan.warmup?.[current.sets.filter((x) => x.warmup).length]?.restSec ?? 60
           : plan.restSec;
-        const next = finishedExercise ? nextIncomplete(a.dayId, entries, a.exIndex) : -1;
+        const next = finishedExercise ? nextIncomplete(a.dayId, a.week, entries, a.exIndex) : -1;
 
         set({
           active: {
@@ -234,7 +251,7 @@ export const useApp = create<State & Actions>()(
           if (!s.active) return s;
           const a = s.active;
           const entries = a.entries.map((e, i) => (i === a.exIndex ? { ...e, skipped: true } : e));
-          const next = nextIncomplete(a.dayId, entries, a.exIndex);
+          const next = nextIncomplete(a.dayId, a.week, entries, a.exIndex);
           return { active: { ...a, entries, exIndex: next >= 0 ? next : a.exIndex, restEndsAt: null } };
         }),
 
@@ -328,7 +345,7 @@ export const useApp = create<State & Actions>()(
     }),
     {
       name: "forge-v2",
-      version: 2,
+      version: 3,
       storage: createJSONStorage(() => localStorage),
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       partialize: ({ hydrated, ...rest }) => rest as unknown as State & Actions,
@@ -339,7 +356,11 @@ export const useApp = create<State & Actions>()(
        */
       migrate: (persisted, version) => {
         const state = (persisted ?? {}) as Partial<State>;
-        if (version >= 2) return state as State & Actions;
+        // v3 : la séance en cours porte la semaine de programme. Une séance
+        // entamée avant cette version n'en a pas, on la laisse tomber plutôt
+        // que de compter ses séries sur un autre plan que celui affiché.
+        if (version >= 3) return state as State & Actions;
+        if (version === 2) return { ...state, active: null } as unknown as State & Actions;
         return {
           ...state,
           programId: DEFAULT_PROGRAM.id,
@@ -370,7 +391,7 @@ export function useTotalXp() {
 }
 
 export function currentPlanExercise(active: ActiveWorkout) {
-  const day = getDay(active.dayId);
+  const day = playedDay(active.dayId, active.week);
   if (!day) return null;
   const plan = day.exercises[active.exIndex];
   const id = active.substitutions[plan.exerciseId] ?? plan.exerciseId;

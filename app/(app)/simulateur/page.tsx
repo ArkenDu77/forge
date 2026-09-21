@@ -5,7 +5,7 @@ import { useMemo, useState } from "react";
 import { Page, TopBar } from "@/components/AppShell";
 import { ExerciseMedia } from "@/components/exercise/ExerciseMedia";
 import { Icon } from "@/components/ui/Icon";
-import { Button, Card, Chip, cx, InfoNote, Sheet } from "@/components/ui/primitives";
+import { Card, Chip, cx, InfoNote, Sheet } from "@/components/ui/primitives";
 import { EXERCISES, ex } from "@/lib/data/exercises";
 import { coachingFor } from "@/lib/data/coaching";
 import { useApp } from "@/lib/store";

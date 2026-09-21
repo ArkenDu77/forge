@@ -157,7 +157,6 @@ export function ExerciseFigure({
     bones.current[k] = el;
   };
   /* eslint-enable react-hooks/refs */
-  const g = `url(#bd-${uid})`;
 
   const INK = "rgba(9,11,16,.93)";
   const isFront = media.view === "front";
