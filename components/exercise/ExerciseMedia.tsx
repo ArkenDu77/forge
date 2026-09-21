@@ -108,16 +108,18 @@ function ExercisePlate({
   return (
     <div ref={wrap} className={cx("relative", className)}>
       {visible && (
-        /* Deux SVG locaux superposés et recolorés au filtre CSS, qu'on fait
-           se relayer en fondu : next/image ne sait ni optimiser un SVG ni
-           produire ce fondu, il n'apporterait rien ici. */
+        /* Deux SVG locaux superposés et recolorés au filtre CSS. next/image ne
+           sait pas optimiser un SVG, il n'apporterait rien ici.
+           Les deux couches alternent : pendant l'animation, l'opacité est
+           pilotée par la classe et jamais par un style en ligne, qui la
+           figerait et ferait réapparaître les deux poses ensemble. */
         <>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={`/exercises/${id}-1.svg`}
             alt={`${label} — position de départ`}
-            className="absolute inset-0 h-full w-full object-contain p-3"
-            style={{ filter: TINT[accent], opacity: frozen === 2 ? 0 : 1 }}
+            className={cx("absolute inset-0 h-full w-full object-contain p-3", animate && "plate-a")}
+            style={{ filter: TINT[accent], ...(animate ? null : { opacity: frozen === 2 ? 0 : 1 }) }}
             loading={priority ? "eager" : "lazy"}
             decoding="async"
             draggable={false}
@@ -127,8 +129,8 @@ function ExercisePlate({
             <img
               src={`/exercises/${id}-2.svg`}
               alt={`${label} — position d'arrivée`}
-              className={cx("absolute inset-0 h-full w-full object-contain p-3", animate && "plate-flip")}
-              style={{ filter: TINT[accent], opacity: animate ? undefined : frozen === 2 ? 1 : 0 }}
+              className={cx("absolute inset-0 h-full w-full object-contain p-3", animate && "plate-b")}
+              style={{ filter: TINT[accent], ...(animate ? null : { opacity: frozen === 2 ? 1 : 0 }) }}
               loading={priority ? "eager" : "lazy"}
               decoding="async"
               draggable={false}

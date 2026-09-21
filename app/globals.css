@@ -49,9 +49,21 @@
   0%, 100% { transform: translate3d(0,0,0) scale(1); }
   50% { transform: translate3d(0,-14px,0) scale(1.04); }
 }
-@keyframes plate-flip {
-  0%, 38% { opacity: 0; }
-  62%, 100% { opacity: 1; }
+/*
+ * Bascule entre la position de départ et la position d'arrivée.
+ *
+ * Les deux couches alternent, en coupe franche. Un fondu ne marche pas ici :
+ * les planches sont des traits sur fond transparent, donc pendant le fondu on
+ * voit les deux poses à la fois — deux barres, quatre haltères, un corps
+ * dédoublé. Une pose à l'écran à la fois, comme une démonstration.
+ */
+@keyframes plate-a {
+  0%, 49.9%   { opacity: 1; }
+  50%, 100%   { opacity: 0; }
+}
+@keyframes plate-b {
+  0%, 49.9%   { opacity: 0; }
+  50%, 100%   { opacity: 1; }
 }
 
 @keyframes pulse-ring {
@@ -131,10 +143,8 @@ body {
   font-feature-settings: "tnum" 1;
 }
 
-/* Fondu entre la position de départ et la position d'arrivée d'une planche. */
-.plate-flip {
-  animation: plate-flip 3s cubic-bezier(0.45, 0, 0.55, 1) infinite;
-}
+.plate-a { animation: plate-a 2.6s steps(1, end) infinite; }
+.plate-b { animation: plate-b 2.6s steps(1, end) infinite; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
