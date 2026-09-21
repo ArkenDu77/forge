@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useMotionValue, useSpring, useTransform } from "motion/react";
+import { motion, useMotionValue, useReducedMotion, useSpring, useTransform } from "motion/react";
 import { useEffect, type ReactNode } from "react";
 import { cx } from "./primitives";
 
@@ -12,7 +12,15 @@ const TONES: Record<string, [string, string]> = {
   chalk: ["#e8edf5", "#9aa6bb"],
 };
 
-/** Compteur animé — la valeur monte, jamais un simple affichage brut. */
+/**
+ * Compteur animé.
+ *
+ * Le ressort est piloté par requestAnimationFrame, qui ne tourne pas toujours :
+ * onglet en arrière-plan, page restaurée depuis le cache, animations réduites.
+ * Le compteur restait alors figé sur sa valeur de départ et affichait un chiffre
+ * faux — 58,5 kg au lieu de 62,5, zéro séance au lieu de trois. L'animation est
+ * un agrément : la valeur finale, elle, est garantie.
+ */
 export function Counter({
   value,
   decimals = 0,
@@ -27,17 +35,31 @@ export function Counter({
   /** valeur de départ de l'animation (0 par défaut) */
   from?: number;
 }) {
-  const mv = useMotionValue(from);
+  const reduce = useReducedMotion();
+  const mv = useMotionValue(reduce ? value : from);
   const spring = useSpring(mv, { stiffness: 90, damping: 20, mass: 0.6 });
-  const text = useTransform(spring, (v) =>
-    new Intl.NumberFormat("fr-FR", { minimumFractionDigits: decimals, maximumFractionDigits: decimals }).format(v)
-  );
+  const format = (v: number) =>
+    new Intl.NumberFormat("fr-FR", { minimumFractionDigits: decimals, maximumFractionDigits: decimals }).format(v);
+  const text = useTransform(spring, format);
+
   useEffect(() => {
     mv.set(value);
-  }, [value, mv]);
+    if (reduce) {
+      spring.jump(value);
+      return;
+    }
+    // Filet : si le ressort n'a pas convergé, on pose la valeur exacte.
+    const settle = setTimeout(() => {
+      if (Math.abs(spring.get() - value) > 0.05) spring.jump(value);
+    }, 1200);
+    return () => clearTimeout(settle);
+  }, [value, mv, spring, reduce]);
+
   return (
     <span className={cx("num", className)}>
-      <motion.span>{text}</motion.span>
+      {/* La valeur exacte reste lisible pour les lecteurs d'écran et la recherche. */}
+      <motion.span aria-hidden>{text}</motion.span>
+      <span className="sr-only">{format(value)}</span>
       {suffix}
     </span>
   );
